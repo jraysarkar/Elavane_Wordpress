@@ -1,9 +1,1119 @@
-/* Elvane design layer on top of Innovecouture. */
+/*
+ * Elvane design layer on top of Innovecouture.
+ * Minimal editorial look: small uppercase type, black on white, full-bleed
+ * photography, gap-free product grid separated by hairlines.
+ */
 
 :root {
 	--elvane-black: #111111;
 	--elvane-white: #ffffff;
-	--elvane-grey-bg: #f3f3f3;
+	--elvane-grey-bg: #f2f2f2;
+	--elvane-line: #e3e3e3;
 	--elvane-grey-text: #6b6b6b;
 	--elvane-sale: #b3261e;
+	--elvane-font: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	--elvane-display: "Cormorant Garamond", "Times New Roman", serif;
+	--elvane-gutter: 24px;
+	--elvane-header-h: 64px;
+	--elvane-announce-h: 30px;
+	--elvane-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+body {
+	color: var(--elvane-black);
+	font-family: var(--elvane-font);
+	font-size: 13px;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Shared small uppercase text link */
+.elvane-textlink .elementor-heading-title,
+.elvane-textlink .elementor-heading-title a {
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	transition: opacity 0.2s var(--elvane-ease);
+}
+
+.elvane-textlink .elementor-heading-title a:hover {
+	opacity: 0.55;
+}
+
+/* ---------- Announcement bar ---------- */
+
+.elvane-announcement {
+	background: var(--elvane-black);
+	color: var(--elvane-white);
+}
+
+.elvane-announcement__text {
+	margin: 0;
+	padding: 0 var(--elvane-gutter);
+	font: 400 11px/var(--elvane-announce-h) var(--elvane-font);
+	letter-spacing: 0.02em;
+	text-align: center;
+}
+
+/* ---------- Header ---------- */
+
+.elementor-location-header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+}
+
+.admin-bar .elementor-location-header {
+	top: 32px;
+}
+
+.elvane-header.e-con {
+	--display: grid;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	min-height: var(--elvane-header-h);
+	padding: 0 var(--elvane-gutter);
+	background: var(--elvane-white);
+	transition: background-color 0.3s var(--elvane-ease);
+}
+
+.elvane-header__left.e-con,
+.elvane-header__center.e-con,
+.elvane-header__right.e-con {
+	--flex-direction: row;
+	--align-items: center;
+	--gap: 22px;
+	--width: auto;
+	flex-direction: row;
+	align-items: center;
+	gap: 22px;
+}
+
+.elvane-header__left.e-con {
+	position: static;
+}
+
+.elvane-header__center.e-con {
+	--justify-content: center;
+	justify-content: center;
+}
+
+.elvane-header__right.e-con {
+	--justify-content: flex-end;
+	justify-content: flex-end;
+}
+
+.elvane-logo img {
+	display: block;
+	width: auto;
+	height: 30px;
+}
+
+/* Home: header floats transparently over the hero, turns solid on scroll */
+.elvane-overlay-header .elementor-location-header {
+	position: fixed;
+	right: 0;
+	left: 0;
+}
+
+.elvane-overlay-header:not(.elvane-scrolled) .elvane-header.e-con {
+	background: transparent;
+}
+
+.elvane-overlay-header .vamtam-main,
+.elvane-overlay-header #main-content {
+	padding-top: 0 !important;
+}
+
+/* Navigation (desktop) */
+.elvane-nav .elementor-nav-menu--main > .elementor-nav-menu > li > .elementor-item {
+	padding: 0;
+	margin-right: 24px;
+	color: var(--elvane-black);
+	font: 400 12px/var(--elvane-header-h) var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-nav .elementor-nav-menu--main .elementor-item:hover,
+.elvane-nav .elementor-nav-menu--main .elementor-item:focus {
+	color: var(--elvane-black);
+	opacity: 0.55;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-arrow {
+	display: none;
+}
+
+/* "Shop" opens a full-width panel (positioned against the header); nested lists become columns */
+.elvane-header .elvane-nav,
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu,
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu > li {
+	position: static !important;
+}
+
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu > li > .sub-menu {
+	position: absolute !important;
+	top: 100% !important;
+	right: 0 !important;
+	left: 0 !important;
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 28px var(--elvane-gutter) 36px !important;
+	background: var(--elvane-white) !important;
+	border-top: 1px solid var(--elvane-line);
+	border-bottom: 1px solid var(--elvane-line);
+	box-shadow: none !important;
+}
+
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu > li > .sub-menu[aria-hidden="false"],
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu > li:hover > .sub-menu {
+	display: flex !important;
+	gap: 64px;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-menu .sub-menu {
+	position: static !important;
+	display: block !important;
+	width: auto !important;
+	min-width: 0 !important;
+	margin: 10px 0 0 !important;
+	padding: 0 !important;
+	background: none !important;
+	border: 0;
+	box-shadow: none !important;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-menu li {
+	display: block;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-menu a.elementor-sub-item {
+	padding: 4px 0 !important;
+	background: none !important;
+	border: 0 !important;
+	color: var(--elvane-black) !important;
+	font: 400 12px/1.6 var(--elvane-font);
+	letter-spacing: 0.02em;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-menu > li > a.elementor-sub-item.has-submenu,
+.elvane-nav .elementor-nav-menu--main .elementor-nav-menu > li > .sub-menu > li > a.elementor-sub-item {
+	color: var(--elvane-grey-text) !important;
+	text-transform: uppercase;
+}
+
+.elvane-nav .elementor-nav-menu--main .sub-menu a.elementor-sub-item:hover {
+	opacity: 0.55;
+}
+
+/* Navigation (mobile dropdown) */
+.elvane-nav .elementor-menu-toggle {
+	padding: 0;
+	background: transparent;
+	color: var(--elvane-black);
+	font-size: 20px;
+}
+
+.elvane-nav .elementor-nav-menu--dropdown {
+	background: var(--elvane-white);
+	border-top: 1px solid var(--elvane-line);
+	border-bottom: 1px solid var(--elvane-line);
+}
+
+.elvane-nav .elementor-nav-menu--dropdown a {
+	padding: 12px var(--elvane-gutter) !important;
+	background: none !important;
+	color: var(--elvane-black) !important;
+	font: 400 12px/1.3 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-nav .elementor-nav-menu--dropdown .sub-menu a {
+	padding-left: calc(var(--elvane-gutter) + 14px) !important;
+	color: var(--elvane-grey-text) !important;
+}
+
+/* Search as a text link (the theme swaps FiboSearch's icon for its own icon font) */
+.elvane-search .dgwt-wcas-search-wrapp.js-dgwt-wcas-layout-icon {
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: none !important;
+}
+
+.elvane-search .dgwt-wcas-search-icon {
+	display: block;
+	width: auto;
+	height: auto;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.elvane-search .dgwt-wcas-search-icon::after {
+	content: "Search";
+}
+
+.elvane-search .dgwt-wcas-search-icon > i,
+.elvane-search .dgwt-wcas-search-icon > svg {
+	display: none;
+}
+
+.elvane-search .dgwt-wcas-search-icon:hover {
+	opacity: 0.55;
+}
+
+/* Side cart trigger as "Bag (0)" */
+.elvane-bag .xoo-wsc-sc-cont,
+.elvane-bag .xoo-wsc-sc-bkcont {
+	display: flex;
+	align-items: center;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.elvane-bag .xoo-wsc-sc-bki {
+	display: none;
+}
+
+.elvane-bag .xoo-wsc-sc-bkcont::before {
+	content: "Bag";
+	margin-right: 4px;
+}
+
+.elvane-bag .xoo-wsc-sc-count {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	line-height: 1;
+}
+
+.elvane-bag .xoo-wsc-sc-count::before {
+	content: "(";
+}
+
+.elvane-bag .xoo-wsc-sc-count::after {
+	content: ")";
+}
+
+/* ---------- Home: hero, full-bleed tiles ---------- */
+
+.elvane-hero.e-con {
+	--display: grid;
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	height: 100vh;
+	min-height: 560px;
+	overflow: hidden;
+}
+
+.elvane-hero__img {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.elvane-hero__img,
+.elvane-hero__img .elementor-widget-container,
+.elvane-hero__img a,
+.elvane-tile__img,
+.elvane-tile__img .elementor-widget-container,
+.elvane-tile__img a {
+	height: 100%;
+}
+
+.elvane-hero__img img,
+.elvane-tile__img img {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	object-fit: cover;
+	object-position: center top;
+}
+
+.elvane-hero__caption.e-con,
+.elvane-tile__caption.e-con {
+	--align-items: center;
+	--gap: 14px;
+	position: absolute;
+	inset: auto 0 12%;
+	align-items: center;
+	gap: 14px;
+	pointer-events: none;
+	text-align: center;
+}
+
+.elvane-hero__caption.e-con {
+	inset: auto 0 14%;
+}
+
+.elvane-hero__caption a,
+.elvane-tile__caption a {
+	pointer-events: auto;
+}
+
+.elvane-display .elementor-heading-title {
+	margin: 0;
+	color: var(--elvane-black);
+	font: 500 clamp(44px, 7vw, 104px)/0.92 var(--elvane-display);
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+}
+
+.elvane-tile.e-con {
+	position: relative;
+	height: 100vh;
+	min-height: 520px;
+	overflow: hidden;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.elvane-tile .elvane-tile__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+}
+
+.elvane-hero__img a,
+.elvane-tile__img a {
+	display: block;
+	width: 100%;
+}
+
+.elvane-tile__eyebrow .elementor-heading-title,
+.elvane-tile__eyebrow .elementor-heading-title a {
+	color: var(--elvane-black);
+	font: 500 clamp(30px, 4vw, 56px)/1 var(--elvane-display);
+	text-transform: uppercase;
+}
+
+.elvane-tile__cta .elementor-heading-title,
+.elvane-tile__cta .elementor-heading-title a {
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.06em;
+	text-decoration: underline;
+	text-underline-offset: 4px;
+	text-transform: uppercase;
+}
+
+.elvane-split.e-con {
+	--display: grid;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+.elvane-tile--half.e-con {
+	height: 90vh;
+}
+
+.elvane-tile--half.e-con + .elvane-tile--half.e-con {
+	border-left: 1px solid var(--elvane-line);
+}
+
+.elvane-section.e-con {
+	padding: 64px 0 0;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.elvane-section__head.e-con {
+	--flex-direction: row;
+	--justify-content: space-between;
+	--align-items: baseline;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: baseline;
+	padding: 0 var(--elvane-gutter) 20px;
+}
+
+.elvane-section__title .elementor-heading-title {
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* ---------- Product grid (shop, categories, home) ---------- */
+
+.woocommerce ul.products,
+.elvane-products ul.products {
+	display: grid !important;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.woocommerce ul.products::before,
+.woocommerce ul.products::after {
+	display: none !important;
+}
+
+.woocommerce ul.products li.product {
+	position: relative;
+	float: none !important;
+	width: auto !important;
+	margin: 0 !important;
+	padding: 0 0 18px !important;
+	border-right: 1px solid var(--elvane-line);
+	border-bottom: 1px solid var(--elvane-line);
+	background: var(--elvane-white);
+	text-align: left;
+}
+
+.woocommerce ul.products li.product:nth-child(4n) {
+	border-right: 0;
+}
+
+.woocommerce ul.products li.product .vamtam-thumb-wrapper {
+	position: relative;
+	aspect-ratio: 3 / 4;
+	margin: 0 0 12px;
+	overflow: hidden;
+	background: var(--elvane-grey-bg);
+}
+
+.woocommerce ul.products li.product .vamtam-thumb-wrapper img,
+.woocommerce ul.products li.product .swiper-wrapper,
+.woocommerce ul.products li.product .swiper-slide {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+/* The theme's hover gallery sits over the main photo (shown on hover) */
+.woocommerce ul.products li.product .vamtam-product-gallery {
+	position: absolute !important;
+	inset: 0;
+	z-index: 1;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.woocommerce ul.products li.product .vamtam-thumb-wrapper img {
+	display: block;
+	margin: 0 !important;
+	object-fit: cover;
+	object-position: center top;
+}
+
+/* Image arrows only on hover, as thin chevrons */
+.woocommerce ul.products li.product .swiper-button-prev,
+.woocommerce ul.products li.product .swiper-button-next {
+	width: 32px;
+	height: 32px;
+	margin-top: -16px;
+	color: var(--elvane-black);
+	opacity: 0;
+	transition: opacity 0.2s var(--elvane-ease);
+}
+
+.woocommerce ul.products li.product .swiper-button-prev::after,
+.woocommerce ul.products li.product .swiper-button-next::after {
+	font-size: 14px;
+}
+
+.woocommerce ul.products li.product:hover .swiper-button-prev,
+.woocommerce ul.products li.product:hover .swiper-button-next {
+	opacity: 1;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+	margin: 0 !important;
+	padding: 0 14px !important;
+	color: var(--elvane-black);
+	font: 400 12px/1.4 var(--elvane-font) !important;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.woocommerce ul.products li.product .price {
+	display: block;
+	margin: 4px 0 0 !important;
+	padding: 0 14px;
+	color: var(--elvane-black) !important;
+	font: 400 12px/1.4 var(--elvane-font) !important;
+}
+
+.woocommerce ul.products li.product .price del {
+	margin-right: 6px;
+	color: var(--elvane-grey-text);
+	opacity: 1;
+}
+
+.woocommerce ul.products li.product .price ins {
+	color: var(--elvane-black);
+	font-weight: 400;
+	text-decoration: none;
+}
+
+/* Reference style: no buttons on the grid, just a small text badge */
+.woocommerce ul.products li.product .button,
+.woocommerce ul.products li.product .added_to_cart,
+.woocommerce ul.products li.product .woosw-btn {
+	display: none !important;
+}
+
+.woocommerce ul.products li.product .onsale,
+.woocommerce span.onsale {
+	top: 12px !important;
+	right: auto !important;
+	left: 12px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: none !important;
+	border-radius: 0 !important;
+	color: var(--elvane-sale) !important;
+	font: 400 11px/1 var(--elvane-font) !important;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* Category / shop page header: small title left, count + sort right */
+.woocommerce.archive .vamtam-main,
+.woocommerce.archive .vamtam-main .limit-wrapper,
+.woocommerce.archive .page-wrapper {
+	max-width: none !important;
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
+.woocommerce.archive #sub-header .meta-header,
+.woocommerce.archive #sub-header .limit-wrapper {
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+
+.woocommerce.archive #sub-header h1,
+.woocommerce.archive .vamtam-main h1,
+.woocommerce.archive .woocommerce-products-header__title {
+	margin: 0;
+	padding: 36px var(--elvane-gutter) 0;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.woocommerce.archive .woocommerce-result-count,
+.woocommerce.archive .woocommerce-ordering {
+	margin: 0 0 16px !important;
+	padding: 20px var(--elvane-gutter) 0;
+	color: var(--elvane-grey-text);
+	font: 400 12px/1 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+.woocommerce.archive .woocommerce-ordering select {
+	padding: 0 18px 0 0;
+	background-color: transparent;
+	border: 0;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+/* ---------- Product page: photos left, sticky narrow details right ---------- */
+
+.single-product .vamtam-main,
+.single-product .vamtam-main .limit-wrapper,
+.single-product .page-wrapper {
+	max-width: none !important;
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
+.single-product #sub-header {
+	display: none;
+}
+
+.single-product div.product.type-product {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	align-items: start;
+	margin: 0;
+}
+
+.single-product div.product > .onsale {
+	position: absolute;
+	z-index: 2;
+}
+
+.single-product div.product > .woocommerce-product-gallery,
+.single-product div.product > .gallery-svi {
+	grid-column: 1;
+	width: 100% !important;
+	margin: 0 !important;
+	float: none !important;
+	background: var(--elvane-grey-bg);
+}
+
+.single-product div.product > .gallery-svi img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.single-product div.product > .summary {
+	position: sticky;
+	top: calc(var(--elvane-announce-h) + var(--elvane-header-h));
+	grid-column: 2;
+	width: 100% !important;
+	max-width: 340px;
+	margin: 0 auto !important;
+	padding: 72px 0 48px !important;
+	float: none !important;
+	font-family: var(--elvane-font);
+}
+
+.single-product div.product > .woocommerce-tabs,
+.single-product div.product > .related,
+.single-product div.product > .up-sells {
+	grid-column: 1 / -1;
+}
+
+.single-product .summary .product_title {
+	margin: 0 0 6px;
+	color: var(--elvane-black);
+	font: 600 12px/1.4 var(--elvane-font) !important;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.single-product .summary .price {
+	margin: 0 0 28px !important;
+	color: var(--elvane-black) !important;
+	font: 400 12px/1.4 var(--elvane-font) !important;
+}
+
+.single-product .summary .price del {
+	margin-right: 6px;
+	color: var(--elvane-grey-text);
+	opacity: 1;
+}
+
+.single-product .summary .price ins {
+	font-weight: 400;
+	text-decoration: none;
+}
+
+/* Variations: label above, compact square swatches */
+.single-product .summary table.variations,
+.single-product .summary table.variations tbody,
+.single-product .summary table.variations tr,
+.single-product .summary table.variations th,
+.single-product .summary table.variations td {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+.single-product .summary table.variations tr {
+	margin-bottom: 18px;
+}
+
+.single-product .summary table.variations th.label,
+.single-product .summary table.variations th.label label {
+	margin-bottom: 8px;
+	color: var(--elvane-black);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.single-product .summary .variable-items-wrapper .variable-item:not(.radio-variable-item) {
+	min-width: 38px;
+	height: 38px;
+	margin: 0 6px 6px 0 !important;
+	border-radius: 0 !important;
+	box-shadow: 0 0 0 1px var(--elvane-line) !important;
+}
+
+.single-product .summary .variable-items-wrapper .variable-item.selected:not(.radio-variable-item),
+.single-product .summary .variable-items-wrapper .variable-item:not(.radio-variable-item):hover {
+	box-shadow: 0 0 0 1px var(--elvane-black) !important;
+}
+
+.single-product .summary .variable-items-wrapper .button-variable-item .variable-item-span {
+	font: 400 11px/1 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+.single-product .summary .reset_variations {
+	color: var(--elvane-grey-text);
+	font: 400 11px/1 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+.single-product .summary .stock {
+	margin: 0 0 12px;
+	color: var(--elvane-grey-text) !important;
+	font: 400 11px/1 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+/* Quantity + full-width black button */
+.single-product .summary .woocommerce-variation-add-to-cart,
+.single-product .summary form.cart:not(.variations_form) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+}
+
+.single-product .summary .quantity {
+	flex: 0 0 72px;
+	margin: 0 !important;
+}
+
+.single-product .summary .quantity input.qty,
+.single-product .summary .quantity .vamtam-quantity {
+	width: 100%;
+	height: 44px;
+	border: 1px solid var(--elvane-line);
+	border-radius: 0;
+	font: 400 12px/1 var(--elvane-font);
+}
+
+.single-product .summary .single_add_to_cart_button {
+	flex: 1 1 auto;
+	height: 44px;
+	margin: 0 !important;
+	padding: 0 16px !important;
+	background: var(--elvane-black) !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	color: var(--elvane-white) !important;
+	font: 400 12px/44px var(--elvane-font) !important;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.single-product .summary .single_add_to_cart_button:hover {
+	opacity: 0.85;
+}
+
+.single-product .summary .single_add_to_cart_button.disabled {
+	opacity: 0.35;
+}
+
+/* One wishlist link, shown as small text */
+.single-product .summary > .woosw-btn {
+	display: none !important;
+}
+
+.single-product .summary .woocommerce-variation-add-to-cart .woosw-btn {
+	flex: 1 0 100%;
+	padding: 10px 0 0;
+	background: none;
+	border: 0;
+	color: var(--elvane-black);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-align: left;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.single-product .summary .product_meta {
+	display: none;
+}
+
+/* Tabs as accordions inside the summary (built by elvane.js) */
+.single-product .summary .woocommerce-tabs {
+	margin: 36px 0 0;
+	padding: 0;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.single-product .summary .woocommerce-tabs ul.tabs {
+	display: none !important;
+}
+
+.elvane-accordion .panel {
+	display: block !important;
+	margin: 0 !important;
+	padding: 0 0 18px !important;
+	border: 0 !important;
+}
+
+.elvane-accordion .panel[hidden] {
+	display: none !important;
+}
+
+.elvane-accordion .panel,
+.elvane-accordion .panel p,
+.elvane-accordion .panel li,
+.elvane-accordion .panel td,
+.elvane-accordion .panel th {
+	color: var(--elvane-black);
+	font: 400 12px/1.6 var(--elvane-font);
+}
+
+.elvane-accordion .panel > h2,
+.elvane-accordion .panel .woocommerce-Reviews-title {
+	display: none;
+}
+
+.elvane-accordion .panel h6 {
+	margin: 14px 0 4px;
+	font: 600 11px/1.4 var(--elvane-font);
+	text-transform: uppercase;
+}
+
+.elvane-accordion .panel .limit-wrapper {
+	max-width: none;
+	padding: 0;
+}
+
+.elvane-accordion__toggle {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	padding: 14px 0;
+	background: none;
+	border: 0;
+	border-bottom: 1px solid var(--elvane-line);
+	color: var(--elvane-black);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-align: left;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.elvane-accordion__toggle::after {
+	content: "+";
+	font-size: 14px;
+}
+
+.elvane-accordion__toggle[aria-expanded="true"] {
+	border-bottom-color: transparent;
+}
+
+.elvane-accordion__toggle[aria-expanded="true"]::after {
+	content: "–";
+}
+
+/* Related products */
+.single-product .related.products {
+	padding-top: 56px;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.single-product .related.products > h2 {
+	margin: 0;
+	padding: 0 var(--elvane-gutter) 20px;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* ---------- Footer ---------- */
+
+.elvane-footer.e-con {
+	--align-items: center;
+	--gap: 22px;
+	align-items: center;
+	gap: 22px;
+	padding: 56px var(--elvane-gutter) 24px;
+	background: var(--elvane-white);
+	border-top: 1px solid var(--elvane-line);
+	text-align: center;
+}
+
+/* Rows take the full width so they never clip once the web font swaps in */
+.elvane-footer .elementor-widget-icon-list,
+.elvane-footer .elementor-widget-icon-list .elementor-widget-container {
+	width: 100%;
+	max-width: none;
+	overflow: visible;
+}
+
+.elvane-footer__bottom .elementor-widget-icon-list,
+.elvane-footer__bottom .elementor-widget-text-editor {
+	width: auto;
+}
+
+.elvane-footer .elementor-icon-list-items {
+	display: flex;
+	width: 100%;
+	margin: 0 !important;
+	overflow: visible;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px 28px;
+}
+
+.elvane-footer .elementor-icon-list-item {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.elvane-footer .elementor-icon-list-item::after,
+.elvane-footer .elementor-icon-list-icon {
+	display: none !important;
+}
+
+.elvane-footer .elementor-icon-list-item > a {
+	padding: 0 !important;
+}
+
+.elvane-footer .elementor-icon-list-text {
+	margin: 0 !important;
+	padding: 0 !important;
+	text-indent: 0 !important;
+	color: var(--elvane-black);
+	font: 400 12px/1.6 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-footer a:hover .elementor-icon-list-text {
+	opacity: 0.55;
+}
+
+.elvane-footer__social .elementor-icon-list-text {
+	color: var(--elvane-grey-text);
+}
+
+.elvane-footer__bottom.e-con {
+	--flex-direction: row;
+	--justify-content: space-between;
+	--align-items: center;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+	width: 100%;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--elvane-line);
+}
+
+.elvane-footer__copy p {
+	margin: 0;
+	color: var(--elvane-grey-text);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-footer__legal .elementor-icon-list-text {
+	color: var(--elvane-grey-text);
+	font-size: 11px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1024px) {
+	:root {
+		--elvane-gutter: 16px;
+		--elvane-header-h: 56px;
+	}
+
+	.elvane-logo img {
+		height: 26px;
+	}
+
+	.elvane-header__right.e-con {
+		--gap: 16px;
+		gap: 16px;
+	}
+
+	.woocommerce ul.products,
+	.elvane-products ul.products {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.woocommerce ul.products li.product:nth-child(4n) {
+		border-right: 1px solid var(--elvane-line);
+	}
+
+	.woocommerce ul.products li.product:nth-child(2n) {
+		border-right: 0;
+	}
+
+	.woocommerce ul.products li.product .swiper-button-prev,
+	.woocommerce ul.products li.product .swiper-button-next {
+		display: none;
+	}
+}
+
+@media (max-width: 782px) {
+	.admin-bar .elementor-location-header {
+		top: 46px;
+	}
+}
+
+@media (max-width: 767px) {
+	.elvane-hide-mobile {
+		display: none !important;
+	}
+
+	.single-product div.product.type-product {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.single-product div.product > .summary {
+		position: static;
+		grid-column: 1;
+		max-width: none;
+		padding: 28px var(--elvane-gutter) 40px !important;
+	}
+
+	.elvane-hero.e-con {
+		grid-template-columns: 1fr;
+		height: 88vh;
+	}
+
+	.elvane-hero__img + .elvane-hero__img {
+		display: none;
+	}
+
+	.elvane-tile.e-con {
+		height: 75vh;
+	}
+
+	.elvane-split.e-con {
+		grid-template-columns: 1fr;
+	}
+
+	.elvane-tile--half.e-con {
+		height: 75vh;
+	}
+
+	.elvane-tile--half.e-con + .elvane-tile--half.e-con {
+		border-left: 0;
+	}
+
+	.elvane-footer__bottom.e-con {
+		--justify-content: center;
+		justify-content: center;
+	}
 }

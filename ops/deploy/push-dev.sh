@@ -3,7 +3,7 @@
 # Actions workflow. Needs the deploy key at ~/.ssh/elvane_dev_deploy.
 set -euo pipefail
 
-HOST="${DEV_HOST:-167.71.233.143}"
+HOST="${DEV_HOST:-167.71.233.143}"  # SSH by IP, so deploys do not depend on DNS
 KEY="${DEV_SSH_KEY_FILE:-$HOME/.ssh/elvane_dev_deploy}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 

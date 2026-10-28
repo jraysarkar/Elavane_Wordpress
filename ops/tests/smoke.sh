@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-BASE="${1:-http://167.71.233.143}"
+BASE="${1:-https://dev.elvaneclothing.com}"
 PAGES=(
 	"/"
 	"/shop/"

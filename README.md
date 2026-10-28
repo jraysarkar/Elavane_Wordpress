@@ -21,7 +21,7 @@ Never edit the parent theme `innovecouture` – updates would overwrite it. Put 
 
 | Branch | Environment | Deploy |
 |---|---|---|
-| `develop` | Dev – http://167.71.233.143 | Automatic on every push (GitHub Actions) |
+| `develop` | Dev – https://dev.elvaneclothing.com | Automatic on every push (GitHub Actions) |
 | `main` | Live – https://elvaneclothing.com | **Manual only**, set up at go-live |
 
 Workflow: branch from `develop` → open a PR into `develop` → CI checks → merge → auto-deploy to dev → test → when approved, PR `develop` → `main`.

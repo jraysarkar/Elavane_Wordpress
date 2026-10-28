@@ -165,6 +165,10 @@ html.elvane-login-open #ht-ctc-chat {
 	font-size: 12px;
 }
 
+.elvane-login__error.is-info {
+	color: #1e6b3a;
+}
+
 .elvane-login__button {
 	width: 100%;
 	height: 48px;

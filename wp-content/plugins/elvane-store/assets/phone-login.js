@@ -11,6 +11,8 @@
 	if ( ! firebase.apps.length ) {
 		firebase.initializeApp( settings.firebase );
 	}
+	// Firebase sign-in lives only for this page; the site login is the WordPress cookie.
+	firebase.auth().setPersistence( firebase.auth.Auth.Persistence.NONE ).catch( function () {} );
 
 	var t = settings.i18n;
 	var phoneForm = root.querySelector( '[data-step="phone"]' );
@@ -19,6 +21,7 @@
 	var digits = Array.prototype.slice.call( codeForm.querySelectorAll( '.elvane-login__otp input' ) );
 	var resendButton = codeForm.querySelector( '[data-elvane-resend]' );
 	var confirmation = null;
+	var confirmedUser = null; // Firebase user whose code was accepted but whose site login failed.
 	var verifier = null;
 	var returnTo = '';
 	var timer = null;
@@ -72,16 +75,49 @@
 		}, 1000 );
 	};
 
-	var sendCode = function () {
+	// Readable message for a Firebase or server error.
+	var messageFor = function ( error, fallback ) {
+		switch ( error && error.code ) {
+			case 'auth/invalid-verification-code':
+				return t.wrongCode;
+			case 'auth/code-expired':
+			case 'auth/session-expired':
+				return t.expired;
+			case 'auth/too-many-requests':
+				return t.tooMany;
+			case 'auth/quota-exceeded':
+				return t.quota;
+			case 'auth/invalid-phone-number':
+				return t.invalidPhone;
+			case 'auth/network-request-failed':
+				return t.network;
+			case 'elvane/server':
+				return t.serverFailed;
+		}
+		return fallback;
+	};
+
+	/**
+	 * Send (or re-send) the SMS code. On resend the customer stays on the code
+	 * step, so status and errors are shown there.
+	 */
+	var sendCode = function ( isResend ) {
+		var form = isResend ? codeForm : phoneForm;
 		var phone = phoneInput.value.replace( /\D/g, '' );
 		if ( phone.length !== 10 ) {
 			setError( phoneForm, t.invalidPhone );
-			phoneInput.focus();
+			showStep( 'phone' );
 			return;
 		}
-		setError( phoneForm, '' );
-		setBusy( phoneForm, true, t.sending );
+		setError( form, '' );
+		if ( isResend ) {
+			resendButton.disabled = true;
+			resendButton.textContent = t.sending;
+		} else {
+			setBusy( phoneForm, true, t.sending );
+		}
 
+		confirmedUser = null;
 		firebase.auth().signInWithPhoneNumber( '+91' + phone, getVerifier() )
 			.then( function ( result ) {
 				confirmation = result;
@@ -89,34 +125,30 @@
 				digits.forEach( function ( input ) {
 					input.value = '';
 				} );
-				setError( codeForm, '' );
+				setError( codeForm, isResend ? t.resent : '' );
+				codeForm.querySelector( '.elvane-login__error' ).classList.toggle( 'is-info', !! isResend );
+				setBusy( codeForm, false, t.verify );
 				showStep( 'code' );
 				startResendTimer();
 			} )
-			.catch( function () {
-				setError( phoneForm, t.sendFailed );
+			.catch( function ( error ) {
 				resetVerifier();
+				setError( form, messageFor( error, t.sendFailed ) );
+				if ( isResend ) {
+					resendButton.disabled = false;
+					resendButton.textContent = t.resend;
+				}
 			} )
 			.then( function () {
-				setBusy( phoneForm, false, t.send );
+				if ( ! isResend ) {
+					setBusy( phoneForm, false, t.send );
+				}
 			} );
 	};
 
-	var verifyCode = function () {
-		var code = digits.map( function ( input ) {
-			return input.value;
-		} ).join( '' );
-		if ( code.length !== 6 || ! confirmation ) {
-			setError( codeForm, t.incomplete );
-			return;
-		}
-		setError( codeForm, '' );
-		setBusy( codeForm, true, t.verifying );
-
-		confirmation.confirm( code )
-			.then( function ( result ) {
-				return result.user.getIdToken();
-			} )
+	// Exchange the Firebase sign-in for a site login.
+	var loginWithFirebaseUser = function ( user ) {
+		return user.getIdToken()
 			.then( function ( idToken ) {
 				var body = new URLSearchParams();
 				body.append( 'action', 'elvane_phone_login' );
@@ -125,11 +157,15 @@
 				return fetch( settings.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: body } );
 			} )
 			.then( function ( response ) {
-				return response.json();
+				return response.json().catch( function () {
+					return null;
+				} );
 			} )
 			.then( function ( json ) {
 				if ( ! json || ! json.success ) {
-					throw new Error( 'rejected' );
+					var error = new Error( 'server' );
+					error.code = 'elvane/server';
+					throw error;
 				}
 				setBusy( codeForm, true, t.success );
 				firebase.auth().signOut().catch( function () {} );
@@ -139,9 +175,40 @@
 				} else {
 					window.location.reload();
 				}
+			} );
+	};
+
+	var verifyCode = function () {
+		setError( codeForm, '' );
+		codeForm.querySelector( '.elvane-login__error' ).classList.remove( 'is-info' );
+
+		// A code works only once: if Firebase already accepted it and only the
+		// site login failed, retry that step without asking for a new code.
+		if ( confirmedUser ) {
+			setBusy( codeForm, true, t.verifying );
+			loginWithFirebaseUser( confirmedUser ).catch( function ( error ) {
+				setError( codeForm, messageFor( error, t.serverFailed ) );
+				setBusy( codeForm, false, t.verify );
+			} );
+			return;
+		}
+
+		var code = digits.map( function ( input ) {
+			return input.value;
+		} ).join( '' );
+		if ( code.length !== 6 || ! confirmation ) {
+			setError( codeForm, t.incomplete );
+			return;
+		}
+		setBusy( codeForm, true, t.verifying );
+
+		confirmation.confirm( code )
+			.then( function ( result ) {
+				confirmedUser = result.user;
+				return loginWithFirebaseUser( result.user );
 			} )
-			.catch( function () {
-				setError( codeForm, t.wrongCode );
+			.catch( function ( error ) {
+				setError( codeForm, messageFor( error, t.wrongCode ) );
 				setBusy( codeForm, false, t.verify );
 			} );
 	};
@@ -166,7 +233,7 @@
 
 	phoneForm.addEventListener( 'submit', function ( event ) {
 		event.preventDefault();
-		sendCode();
+		sendCode( false );
 	} );
 
 	phoneInput.addEventListener( 'input', function () {
@@ -180,12 +247,15 @@
 
 	codeForm.querySelector( '[data-elvane-edit]' ).addEventListener( 'click', function () {
 		window.clearInterval( timer );
+		confirmedUser = null;
+		confirmation = null;
+		firebase.auth().signOut().catch( function () {} );
 		showStep( 'phone' );
 	} );
 
 	resendButton.addEventListener( 'click', function () {
 		resetVerifier();
-		sendCode();
+		sendCode( true );
 	} );
 
 	digits.forEach( function ( input, index ) {

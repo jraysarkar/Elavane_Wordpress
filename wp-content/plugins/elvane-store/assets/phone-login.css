@@ -1,0 +1,267 @@
+/* Elvane phone login popup: square, black and white, small uppercase type. */
+
+.elvane-login[hidden] {
+	display: none !important;
+}
+
+.elvane-login {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	color: #111;
+}
+
+html.elvane-login-open {
+	overflow: hidden;
+}
+
+/* Floating WhatsApp button (Click to Chat) would cover the form */
+html.elvane-login-open .ht-ctc,
+html.elvane-login-open #ht-ctc-chat {
+	display: none !important;
+}
+
+.elvane-login__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(17, 17, 17, 0.55);
+	animation: elvane-login-fade 0.25s ease both;
+}
+
+.elvane-login__panel {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	width: 100%;
+	max-width: 820px;
+	min-height: 500px;
+	background: #fff;
+	animation: elvane-login-rise 0.35s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+
+.elvane-login__media {
+	background: #f2f2f2 center top / cover no-repeat;
+}
+
+.elvane-login__body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 56px 44px 40px;
+}
+
+.elvane-login__close {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: #111;
+	font: 300 26px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	cursor: pointer;
+}
+
+.elvane-login__step[hidden] {
+	display: none;
+}
+
+.elvane-login__eyebrow {
+	margin: 0 0 14px;
+	color: #6b6b6b;
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.elvane-login__title {
+	margin: 0 0 10px;
+	color: #111;
+	font: 500 30px/1.05 "Cormorant Garamond", "Times New Roman", serif;
+	letter-spacing: 0;
+	text-transform: uppercase;
+}
+
+.elvane-login__text {
+	margin: 0 0 24px;
+	color: #6b6b6b;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.elvane-login__text strong {
+	color: #111;
+	font-weight: 500;
+}
+
+.elvane-login__phone {
+	display: flex;
+	align-items: stretch;
+	height: 48px;
+	border: 1px solid #e3e3e3;
+}
+
+.elvane-login__phone:focus-within {
+	border-color: #111;
+}
+
+.elvane-login__cc {
+	display: flex;
+	align-items: center;
+	padding: 0 14px;
+	border-right: 1px solid #e3e3e3;
+	font-size: 13px;
+}
+
+.elvane-login__phone input {
+	flex: 1;
+	min-width: 0;
+	height: auto;
+	padding: 0 14px;
+	background: none;
+	border: 0 !important;
+	box-shadow: none !important;
+	color: #111;
+	font: 400 14px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	letter-spacing: 0.04em;
+	outline: none;
+}
+
+.elvane-login__otp {
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.elvane-login__otp input {
+	height: 52px;
+	padding: 0;
+	background: #fff;
+	border: 1px solid #e3e3e3;
+	border-radius: 0;
+	box-shadow: none;
+	color: #111;
+	font: 500 18px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	text-align: center;
+	outline: none;
+}
+
+.elvane-login__otp input:focus {
+	border-color: #111;
+}
+
+.elvane-login__error {
+	min-height: 18px;
+	margin: 8px 0 4px;
+	color: #b3261e;
+	font-size: 12px;
+}
+
+.elvane-login__button {
+	width: 100%;
+	height: 48px;
+	background: #111;
+	border: 0;
+	border-radius: 0;
+	color: #fff;
+	font: 400 12px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: opacity 0.2s ease;
+}
+
+.elvane-login__button:hover {
+	opacity: 0.85;
+}
+
+.elvane-login__button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.elvane-login__legal {
+	margin: 18px 0 0;
+	color: #6b6b6b;
+	font-size: 11px;
+	line-height: 1.5;
+}
+
+.elvane-login__legal a,
+.elvane-login__link {
+	padding: 0;
+	background: none;
+	border: 0;
+	color: #111;
+	font: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.elvane-login__link {
+	margin-left: 6px;
+	font-size: 12px;
+	text-transform: uppercase;
+}
+
+.elvane-login__link:disabled {
+	color: #6b6b6b;
+	text-decoration: none;
+	cursor: default;
+}
+
+.elvane-login__resend {
+	margin: 16px 0 0;
+	text-align: center;
+}
+
+.elvane-login__resend .elvane-login__link {
+	margin: 0;
+	font-size: 11px;
+}
+
+@keyframes elvane-login-fade {
+	from { opacity: 0; }
+}
+
+@keyframes elvane-login-rise {
+	from { opacity: 0; transform: translateY(16px); }
+}
+
+@media (max-width: 767px) {
+	.elvane-login {
+		align-items: flex-end;
+		padding: 0;
+	}
+
+	.elvane-login__panel {
+		grid-template-columns: 1fr;
+		min-height: 0;
+		max-height: 92vh;
+		overflow-y: auto;
+	}
+
+	.elvane-login__media {
+		display: none;
+	}
+
+	.elvane-login__body {
+		padding: 44px 20px 28px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.elvane-login__backdrop,
+	.elvane-login__panel {
+		animation: none;
+	}
+}

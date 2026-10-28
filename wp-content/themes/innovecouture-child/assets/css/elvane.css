@@ -225,7 +225,9 @@ body {
 	opacity: 0.55;
 }
 
-/* Navigation (mobile dropdown) */
+/* Navigation (mobile): full-width panel under the header. Elementor's own
+   "stretch" positioning lands it over the logo, so it is pinned with
+   position: fixed at --elvane-menu-top (set by elvane.js when it opens). */
 .elvane-nav .elementor-menu-toggle {
 	padding: 0;
 	background: transparent;
@@ -233,24 +235,82 @@ body {
 	font-size: 20px;
 }
 
-.elvane-nav .elementor-nav-menu--dropdown {
+.elvane-nav nav.elementor-nav-menu--dropdown {
+	position: fixed !important;
+	top: var(--elvane-menu-top, 98px) !important;
+	right: 0 !important;
+	left: 0 !important;
+	width: auto !important;
+	height: calc(100dvh - var(--elvane-menu-top, 98px)) !important;
+	max-height: none !important;
+	margin: 0 !important;
+	padding: 8px var(--elvane-gutter) 32px;
+	overflow-y: auto;
 	background: var(--elvane-white);
 	border-top: 1px solid var(--elvane-line);
+	overscroll-behavior: contain;
+}
+
+.elvane-nav .elementor-menu-toggle:not(.elementor-active) + nav.elementor-nav-menu--dropdown {
+	display: none;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown li {
 	border-bottom: 1px solid var(--elvane-line);
 }
 
-.elvane-nav .elementor-nav-menu--dropdown a {
-	padding: 12px var(--elvane-gutter) !important;
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-menu li {
+	border-bottom: 0;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown a {
+	display: flex !important;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18px 0 !important;
 	background: none !important;
 	color: var(--elvane-black) !important;
-	font: 400 12px/1.3 var(--elvane-font);
-	letter-spacing: 0.04em;
+	font: 400 13px/1.3 var(--elvane-font);
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
 }
 
-.elvane-nav .elementor-nav-menu--dropdown .sub-menu a {
-	padding-left: calc(var(--elvane-gutter) + 14px) !important;
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-menu {
+	position: static !important;
+	width: auto !important;
+	margin: 0 !important;
+	padding: 0 0 12px !important;
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-menu a {
+	padding: 10px 0 10px 14px !important;
 	color: var(--elvane-grey-text) !important;
+	font-size: 12px;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-menu .sub-menu a {
+	padding-left: 28px !important;
+}
+
+/* "+" / "−" in place of the theme's (missing) arrow icon */
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-arrow {
+	padding: 0 !important;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-arrow > * {
+	display: none;
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown .sub-arrow::after {
+	content: "+";
+	font: 300 18px/1 var(--elvane-font);
+}
+
+.elvane-nav nav.elementor-nav-menu--dropdown .has-submenu[aria-expanded="true"] .sub-arrow::after {
+	content: "\2212";
 }
 
 /* Search as a text link (the theme swaps FiboSearch's icon for its own icon font) */
@@ -282,6 +342,176 @@ body {
 
 .elvane-search .dgwt-wcas-search-icon:hover {
 	opacity: 0.55;
+}
+
+/* Bigger tap area for the phone search trigger (the label is only 12px tall) */
+.elvane-search .js-dgwt-wcas-enable-mobile-form {
+	top: -16px !important;
+	right: -8px !important;
+	bottom: -16px !important;
+	left: -8px !important;
+	width: auto !important;
+	height: auto !important;
+}
+
+/* Mobile search screen (FiboSearch overlay) */
+.dgwt-wcas-overlay-mobile {
+	z-index: 100000;
+	background: var(--elvane-white);
+}
+
+.dgwt-wcas-overlay-mobile::after {
+	content: "Search by product, colour or category";
+	display: block;
+	padding: 28px var(--elvane-gutter);
+	color: var(--elvane-grey-text);
+	font: 400 12px/1.5 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar {
+	align-items: center;
+	height: 64px;
+	padding: 0 var(--elvane-gutter) 0 4px;
+	border-bottom: 1px solid var(--elvane-line);
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar button.dgwt-wcas-om-return,
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar button.dgwt-wcas-om-return:hover,
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar button.dgwt-wcas-om-return:focus {
+	flex: 0 0 44px;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	background: transparent !important;
+	border: 0;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar .dgwt-wcas-om-return svg {
+	top: 12px;
+	left: 10px;
+	width: 20px;
+	height: 20px;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-om-bar .dgwt-wcas-om-return path {
+	fill: var(--elvane-black) !important;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-search-wrapp-mobile {
+	flex: 1;
+	min-width: 0;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-sf-wrapp {
+	padding: 0 !important;
+	background: none !important;
+	border-radius: 0 !important;
+}
+
+.dgwt-wcas-overlay-mobile input.dgwt-wcas-search-input,
+.dgwt-wcas-overlay-mobile input.dgwt-wcas-search-input:focus {
+	height: 44px !important;
+	padding: 0 36px 0 0 !important;
+	color: var(--elvane-black);
+	background: transparent !important;
+	border: 0 !important;
+	border-bottom: 1px solid var(--elvane-black) !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	font: 400 16px/1 var(--elvane-font) !important; /* 16px stops iOS zooming in */
+	letter-spacing: 0.02em;
+}
+
+.dgwt-wcas-overlay-mobile input.dgwt-wcas-search-input::placeholder {
+	color: var(--elvane-grey-text);
+	opacity: 1;
+}
+
+.dgwt-wcas-overlay-mobile .dgwt-wcas-close,
+.dgwt-wcas-overlay-mobile .dgwt-wcas-preloader {
+	right: 0 !important;
+}
+
+.dgwt-wcas-overlay-mobile-on .dgwt-wcas-suggestions-wrapp {
+	top: 64px !important;
+	height: calc(100% - 64px) !important;
+	max-height: none !important;
+	padding: 8px 0 24px;
+	border: 0 !important;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-st--direct-headline,
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion-headline {
+	padding: 16px var(--elvane-gutter) 8px;
+	border: 0;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion-headline .dgwt-wcas-st {
+	color: var(--elvane-grey-text);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion {
+	padding: 10px var(--elvane-gutter);
+	border-bottom: 1px solid var(--elvane-line);
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion.dgwt-wcas-suggestion-selected {
+	background: var(--elvane-grey-bg);
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-si {
+	flex: 0 0 48px;
+	width: 48px;
+	margin-right: 14px;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-si img {
+	width: 48px;
+	max-width: none;
+	height: 64px;
+	padding: 0;
+	border: 0;
+	background: var(--elvane-grey-bg);
+	object-fit: cover;
+	object-position: center top;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-st {
+	color: var(--elvane-black);
+	font: 400 12px/1.4 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-st strong {
+	font-weight: 600;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-sp {
+	color: var(--elvane-black);
+	font: 400 12px/1.4 var(--elvane-font);
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-sp del {
+	color: var(--elvane-grey-text);
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion-more {
+	padding: 16px var(--elvane-gutter);
+	border: 0;
+}
+
+.dgwt-wcas-suggestions-wrapp .dgwt-wcas-suggestion-more .dgwt-wcas-st-more {
+	font: 500 12px/1 var(--elvane-font);
+	letter-spacing: 0.06em;
+	text-decoration: underline;
+	text-transform: uppercase;
+	text-underline-offset: 4px;
 }
 
 /* Side cart trigger as "Bag (0)" */

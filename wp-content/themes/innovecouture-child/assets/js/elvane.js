@@ -12,6 +12,27 @@
 
 	var reduceMotion = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
+	// Mobile menu: open its panel right under the header (whose bottom moves as
+	// the announcement bar scrolls away).
+	var header = document.querySelector( '.elementor-location-header' );
+	if ( header ) {
+		var placeMenu = function () {
+			document.documentElement.style.setProperty( '--elvane-menu-top', Math.max( 0, header.getBoundingClientRect().bottom ) + 'px' );
+		};
+		placeMenu();
+		document.querySelectorAll( '.elvane-nav .elementor-menu-toggle' ).forEach( function ( toggle ) {
+			toggle.addEventListener( 'click', placeMenu );
+		} );
+		window.addEventListener( 'scroll', placeMenu, { passive: true } );
+		window.addEventListener( 'resize', placeMenu );
+	}
+
+	// Account tabs (one scrolling row on phones): bring the current tab into view.
+	var activeTab = document.querySelector( '.woocommerce-MyAccount-navigation li.is-active' );
+	if ( activeTab && activeTab.parentNode.scrollWidth > activeTab.parentNode.clientWidth ) {
+		activeTab.parentNode.scrollLeft = activeTab.offsetLeft - activeTab.parentNode.offsetLeft - 16;
+	}
+
 	// Fade images in once they have loaded (tiles, hero, product grid).
 	document.querySelectorAll( '.elvane-hero img, .elvane-tile img, ul.products li.product img' ).forEach( function ( img ) {
 		var done = function () {

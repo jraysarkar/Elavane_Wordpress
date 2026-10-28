@@ -21,7 +21,7 @@ PAGES=(
 
 fail=0
 for path in "${PAGES[@]}"; do
-	body="$(curl -s -L -w '\n%{http_code} %{time_total}' "$BASE$path")"
+	body="$(curl -s -L -m 60 -w '\n%{http_code} %{time_total}' "$BASE$path")"
 	meta="$(tail -n1 <<<"$body")"
 	code="${meta%% *}"
 	secs="${meta##* }"

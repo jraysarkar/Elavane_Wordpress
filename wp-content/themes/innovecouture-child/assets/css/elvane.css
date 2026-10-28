@@ -794,9 +794,12 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	height: auto;
 }
 
+/* Sticky details column. When it is taller than the screen, elvane.js sets a
+   negative --elvane-summary-top so it scrolls normally and sticks only once its
+   bottom is in view; all of the description stays readable. */
 .single-product div.product > .summary {
 	position: sticky;
-	top: calc(var(--elvane-announce-h) + var(--elvane-header-h));
+	top: var(--elvane-summary-top, calc(var(--elvane-announce-h) + var(--elvane-header-h)));
 	grid-column: 2;
 	width: 100% !important;
 	max-width: 340px;
@@ -1067,9 +1070,22 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 }
 
 /* Related products */
-.single-product .related.products {
+/* Rendered after the product block (see functions.php) */
+.single-product .related.products,
+.single-product .up-sells.products {
+	clear: both;
 	padding-top: 56px;
 	border-top: 1px solid var(--elvane-line);
+	background: var(--elvane-white);
+}
+
+.single-product .up-sells.products > h2 {
+	margin: 0;
+	padding: 0 var(--elvane-gutter) 20px;
+	color: var(--elvane-black);
+	font: 400 12px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 .single-product .related.products > h2 {

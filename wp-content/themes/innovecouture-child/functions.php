@@ -133,6 +133,13 @@ add_filter( 'woocommerce_sale_flash', 'elvane_sale_flash' );
 function elvane_move_product_tabs() {
 	remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10 );
 	add_action( 'woocommerce_single_product_summary', 'woocommerce_output_product_data_tabs', 45 );
+
+	// Up-sells and "You may also like" go after the product block, so the sticky
+	// details column stops at the end of the photos instead of sliding over them.
+	remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 );
+	remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
+	add_action( 'woocommerce_after_single_product', 'woocommerce_upsell_display', 15 );
+	add_action( 'woocommerce_after_single_product', 'woocommerce_output_related_products', 20 );
 }
 add_action( 'wp', 'elvane_move_product_tabs' );
 

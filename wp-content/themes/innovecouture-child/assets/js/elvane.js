@@ -96,6 +96,25 @@
 		window.addEventListener( 'resize', request );
 	}
 
+	// Product page: keep the sticky details column readable when it is taller
+	// than the screen (scroll with the page, then stick by its bottom edge).
+	var summary = document.querySelector( '.single-product div.product > .summary' );
+	if ( summary ) {
+		var header = document.querySelector( '.elementor-location-header' );
+		var placeSummary = function () {
+			var headerBottom = header ? header.getBoundingClientRect().height : 0;
+			var room = window.innerHeight - headerBottom;
+			var top = summary.offsetHeight > room ? window.innerHeight - summary.offsetHeight : headerBottom;
+			summary.style.setProperty( '--elvane-summary-top', Math.round( top ) + 'px' );
+		};
+		placeSummary();
+		window.addEventListener( 'resize', placeSummary );
+		window.addEventListener( 'load', placeSummary );
+		if ( 'ResizeObserver' in window ) {
+			new ResizeObserver( placeSummary ).observe( summary );
+		}
+	}
+
 	// Product page: turn the WooCommerce tabs into stacked accordions (first one open).
 	var tabs = document.querySelector( '.single-product .summary .woocommerce-tabs' );
 	if ( tabs ) {

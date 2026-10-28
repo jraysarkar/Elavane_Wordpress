@@ -75,32 +75,59 @@ function elvane_verified_firebase_phone( $id_token ) {
 
 /**
  * Existing customer with this phone number, or a new one.
- * Same storage as the original live code: username = phone, meta `phone_number`.
  *
- * @param string $phone Verified phone number.
+ * Existing accounts store the number as "91XXXXXXXXXX" (WordPress strips the
+ * "+" from usernames), while Firebase returns "+91XXXXXXXXXX", so every
+ * usual spelling is matched. New accounts use the same "91XXXXXXXXXX" form.
+ *
+ * @param string $phone Verified phone number, "+91XXXXXXXXXX".
  * @return WP_User|WP_Error
  */
 function elvane_customer_for_phone( $phone ) {
-	$users = get_users(
-		array(
-			'meta_key'   => 'phone_number',
-			'meta_value' => $phone,
-			'number'     => 1,
-		)
-	);
-	if ( $users ) {
-		return $users[0];
+	$digits   = preg_replace( '/\D/', '', $phone ); // 91XXXXXXXXXX
+	$local    = substr( $digits, -10 );            // XXXXXXXXXX
+	$variants = array_unique( array( $digits, '+' . $digits, $local, '0' . $local ) );
+
+	foreach ( array( 'phone_number', 'billing_phone' ) as $meta_key ) {
+		$users = get_users(
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => $meta_key,
+						'value'   => $variants,
+						'compare' => 'IN',
+					),
+				),
+				'orderby'    => 'ID',
+				'order'      => 'ASC',
+				'number'     => 1,
+			)
+		);
+		if ( $users ) {
+			$user = $users[0];
+			break;
+		}
 	}
 
-	$user = get_user_by( 'login', $phone );
-	if ( $user ) {
-		update_user_meta( $user->ID, 'phone_number', $phone );
+	if ( empty( $user ) ) {
+		foreach ( $variants as $login ) {
+			$user = get_user_by( 'login', $login );
+			if ( $user ) {
+				break;
+			}
+		}
+	}
+
+	if ( ! empty( $user ) ) {
+		if ( ! get_user_meta( $user->ID, 'phone_number', true ) ) {
+			update_user_meta( $user->ID, 'phone_number', $digits );
+		}
 		return $user;
 	}
 
 	$user_id = wp_insert_user(
 		array(
-			'user_login' => $phone,
+			'user_login' => $digits,
 			'user_pass'  => wp_generate_password( 32 ),
 			'role'       => 'customer',
 		)
@@ -108,8 +135,8 @@ function elvane_customer_for_phone( $phone ) {
 	if ( is_wp_error( $user_id ) ) {
 		return $user_id;
 	}
-	update_user_meta( $user_id, 'phone_number', $phone );
-	update_user_meta( $user_id, 'billing_phone', $phone );
+	update_user_meta( $user_id, 'phone_number', $digits );
+	update_user_meta( $user_id, 'billing_phone', $local );
 
 	return get_user_by( 'id', $user_id );
 }
@@ -127,6 +154,7 @@ function elvane_ajax_phone_login() {
 
 	$user = elvane_customer_for_phone( $phone );
 	if ( is_wp_error( $user ) ) {
+		error_log( 'Elvane phone login: could not get account for ' . substr( $phone, 0, 5 ) . '…: ' . $user->get_error_code() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		wp_send_json_error( array( 'message' => __( 'Could not sign you in. Please try again.', 'elvane-store' ) ), 500 );
 	}
 

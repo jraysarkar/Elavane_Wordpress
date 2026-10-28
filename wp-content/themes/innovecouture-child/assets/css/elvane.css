@@ -724,6 +724,27 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	padding: 0;
 }
 
+/* Category description (if one is written), aligned with the title */
+.woocommerce.archive #sub-header .page-header-line {
+	display: none;
+}
+
+.woocommerce.archive #sub-header .desc {
+	max-width: 640px;
+	margin: 0;
+	padding: 12px var(--elvane-gutter) 0;
+	color: var(--elvane-grey-text);
+	font: 400 13px/1.6 var(--elvane-font);
+}
+
+.woocommerce.archive #sub-header .desc p {
+	margin: 0;
+}
+
+.woocommerce.archive #sub-header .desc:empty {
+	display: none;
+}
+
 .woocommerce.archive #sub-header h1,
 .woocommerce.archive .vamtam-main h1,
 .woocommerce.archive .woocommerce-products-header__title {

@@ -144,6 +144,20 @@ function elvane_move_product_tabs() {
 add_action( 'wp', 'elvane_move_product_tabs' );
 
 /**
+ * The theme prints the post type's description under the Shop title, which for
+ * products is WooCommerce's built-in "This is where you can browse products in
+ * this store." Show nothing there instead.
+ *
+ * @param string       $description Post type description.
+ * @param WP_Post_Type $post_type   Post type object.
+ * @return string
+ */
+function elvane_no_product_type_description( $description, $post_type ) {
+	return ( $post_type instanceof WP_Post_Type && 'product' === $post_type->name ) ? '' : $description;
+}
+add_filter( 'get_the_post_type_description', 'elvane_no_product_type_description', 10, 2 );
+
+/**
  * "You may also like" instead of "Related products".
  *
  * @return string

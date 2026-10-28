@@ -947,3 +947,134 @@
 		display: none;
 	}
 }
+
+/* ---------- Shipment card, order updates, tracking column ---------- */
+
+.elvane-store-page .elvane-shipment {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: end;
+	gap: 16px 24px;
+	margin: 8px 0 32px;
+	padding: 20px 22px;
+	background: var(--elvane-grey-bg);
+	border-left: 2px solid var(--elvane-black);
+}
+
+.elvane-store-page .elvane-shipment__head {
+	display: flex;
+	grid-column: 1 / -1;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 6px 16px;
+}
+
+.elvane-store-page .elvane-shipment__label {
+	font: 500 12px/1.3 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-store-page .elvane-shipment__date {
+	color: var(--elvane-grey-text);
+	font-size: 12px;
+}
+
+.elvane-store-page .elvane-shipment__details {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 40px;
+	margin: 0;
+}
+
+.elvane-store-page .elvane-shipment__details dt {
+	margin: 0 0 2px;
+	color: var(--elvane-grey-text);
+	font: 400 11px/1.3 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-store-page .elvane-shipment__details dd {
+	margin: 0;
+	font: 500 14px/1.4 var(--elvane-font);
+}
+
+.elvane-store-page .elvane-shipment__awb {
+	letter-spacing: 0.04em;
+	font-variant-numeric: tabular-nums;
+}
+
+.elvane-store-page .elvane-shipment .elvane-shipment__track {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	min-height: 40px;
+	padding: 0 20px !important;
+	line-height: 1 !important;
+	white-space: nowrap;
+}
+
+/* Order updates as a short timeline */
+.elvane-store-page .elvane-updates {
+	margin: 0 0 36px;
+	padding: 0;
+	border-left: 1px solid var(--elvane-line);
+	list-style: none;
+}
+
+.elvane-store-page .elvane-updates__item {
+	position: relative;
+	margin: 0;
+	padding: 0 0 18px 20px;
+}
+
+.elvane-store-page .elvane-updates__item::before {
+	content: "";
+	position: absolute;
+	top: 5px;
+	left: -4px;
+	width: 7px;
+	height: 7px;
+	background: var(--elvane-black);
+	border-radius: 50%;
+}
+
+.elvane-store-page .elvane-updates__date {
+	display: block;
+	margin-bottom: 4px;
+	color: var(--elvane-grey-text);
+	font: 400 11px/1.3 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-store-page .elvane-updates__text p {
+	margin: 0;
+	font-size: 13px;
+}
+
+/* My account → Orders: tracking column */
+.elvane-store-page .elvane-track-link {
+	font-weight: 500;
+}
+
+.elvane-store-page .elvane-track-courier {
+	display: block;
+	font-size: 11px;
+}
+
+.elvane-store-page .elvane-muted {
+	color: var(--elvane-grey-text);
+}
+
+@media (max-width: 767px) {
+	.elvane-store-page .elvane-shipment {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.elvane-store-page .elvane-shipment .elvane-shipment__track {
+		width: 100%;
+	}
+}

@@ -121,20 +121,24 @@ body {
 	height: 22px;
 }
 
-/* Home: header floats transparently over the hero, turns solid on scroll */
-.elvane-overlay-header .elementor-location-header {
-	position: fixed;
-	right: 0;
-	left: 0;
-}
+/* Home (desktop only): header floats transparently over the hero, turns solid
+   on scroll. On phones and tablets the logo would sit on the model's head, so
+   the header stays solid and the photos start below it. */
+@media (min-width: 1025px) {
+	.elvane-overlay-header .elementor-location-header {
+		position: fixed;
+		right: 0;
+		left: 0;
+	}
 
-.elvane-overlay-header:not(.elvane-scrolled) .elvane-header.e-con {
-	background: transparent;
-}
+	.elvane-overlay-header:not(.elvane-scrolled) .elvane-header.e-con {
+		background: transparent;
+	}
 
-.elvane-overlay-header .vamtam-main,
-.elvane-overlay-header #main-content {
-	padding-top: 0 !important;
+	.elvane-overlay-header .vamtam-main,
+	.elvane-overlay-header #main-content {
+		padding-top: 0 !important;
+	}
 }
 
 /* Navigation (desktop) */
@@ -1351,6 +1355,13 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1024px) {
+	/* Pinned home sections sit below the solid header */
+	.elvane-stack.e-con {
+		top: calc(var(--elvane-announce-h) + var(--elvane-header-h));
+		height: calc(100svh - var(--elvane-announce-h) - var(--elvane-header-h));
+		min-height: 0;
+	}
+
 	:root {
 		--elvane-gutter: 16px;
 		--elvane-header-h: 56px;

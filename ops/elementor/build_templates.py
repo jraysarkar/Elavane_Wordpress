@@ -22,7 +22,7 @@ FACEBOOK = "https://www.facebook.com/share/1HsqCH4Cnt/"
 
 # Media-library attachment IDs on the site (Elvane's own photography).
 IMAGES = {
-	"logo": (1920, "2023/12/elvance-black.png"),
+	"logo": (2986, "2026/10/elvane-logo-black.png"),  # source: ops/brand/
 	"hero_left": (2797, "2026/06/3.2.png"),
 	"hero_right": (2765, "2026/06/1.2.png"),
 	"trousers": (2489, "2026/05/WhatsApp-Image-2026-05-24-at-5.02.22-PM.jpeg"),

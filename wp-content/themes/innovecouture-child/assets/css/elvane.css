@@ -108,7 +108,7 @@ body {
 .elvane-logo img {
 	display: block;
 	width: auto;
-	height: 30px;
+	height: 22px;
 }
 
 /* Home: header floats transparently over the hero, turns solid on scroll */
@@ -1150,7 +1150,7 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	}
 
 	.elvane-logo img {
-		height: 26px;
+		height: 18px;
 	}
 
 	.elvane-header__right.e-con {

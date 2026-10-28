@@ -41,8 +41,30 @@
 		}, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 } );
 		revealTargets.forEach( function ( el ) {
 			el.classList.add( 'elvane-reveal' );
-			observer.observe( el );
+			if ( el.getBoundingClientRect().top < window.innerHeight ) {
+				// Already on screen: animate in right away.
+				window.requestAnimationFrame( function () {
+					el.classList.add( 'is-visible' );
+				} );
+			} else {
+				observer.observe( el );
+			}
 		} );
+		// Fail-safe: content must never stay hidden if the observer does not fire.
+		window.setTimeout( function () {
+			revealTargets.forEach( function ( el ) {
+				if ( el.getBoundingClientRect().top < window.innerHeight * 1.5 ) {
+					el.classList.add( 'is-visible' );
+				}
+			} );
+		}, 3000 );
+		window.addEventListener( 'scroll', function () {
+			revealTargets.forEach( function ( el ) {
+				if ( ! el.classList.contains( 'is-visible' ) && el.getBoundingClientRect().top < window.innerHeight ) {
+					el.classList.add( 'is-visible' );
+				}
+			} );
+		}, { passive: true } );
 	}
 
 	// Home: full-screen sections stack over each other (CSS sticky). While a

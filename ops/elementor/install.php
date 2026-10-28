@@ -140,6 +140,51 @@ if ( $home_id && is_readable( "$dir/home.json" ) ) {
 	update_post_meta( $home_id, '_elementor_data', wp_slash( file_get_contents( "$dir/home.json" ) ) );
 }
 
+/* ---------- Brand: site icon and order-email logo ---------- */
+
+/** Newest media-library item whose file is named "$name.png" (e.g. elvane-site-icon). */
+function elvane_attachment_id( $name ) {
+	global $wpdb;
+	return (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s ORDER BY post_id DESC LIMIT 1",
+		'%/' . $wpdb->esc_like( $name ) . '.png'
+	) );
+}
+
+$icon_id = elvane_attachment_id( 'elvane-site-icon' );
+if ( $icon_id ) {
+	update_option( 'site_icon', $icon_id );
+}
+
+$logo_id = elvane_attachment_id( 'elvane-logo-black' );
+if ( $logo_id ) {
+	$logo_url = wp_get_attachment_url( $logo_id );
+	update_option( 'woocommerce_email_header_image', $logo_url );
+
+	// YayMail templates embed the old logo URL inside their element data.
+	$old_logo = '/uploads/2023/12/elvance-black.png';
+	$new_logo = '/uploads/' . get_post_meta( $logo_id, '_wp_attached_file', true );
+	$replace  = function ( $value ) use ( &$replace, $old_logo, $new_logo ) {
+		if ( is_array( $value ) ) {
+			return array_map( $replace, $value );
+		}
+		return is_string( $value ) ? str_replace( $old_logo, $new_logo, $value ) : $value;
+	};
+	// Templates only: revisions are history, and update_post_meta() on a
+	// revision ID would write onto its parent template.
+	global $wpdb;
+	$templates = $wpdb->get_col( $wpdb->prepare(
+		"SELECT m.post_id FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id
+		WHERE m.meta_key = '_yaymail_elements' AND p.post_type <> 'revision' AND m.meta_value LIKE %s",
+		'%' . $wpdb->esc_like( $old_logo ) . '%'
+	) );
+	foreach ( $templates as $template_id ) {
+		$elements = get_post_meta( $template_id, '_yaymail_elements', true );
+		update_metadata( 'post', (int) $template_id, '_yaymail_elements', $replace( $elements ) );
+	}
+	WP_CLI::log( sprintf( 'email logo set; %d YayMail templates updated', count( $templates ) ) );
+}
+
 \Elementor\Plugin::$instance->files_manager->clear_cache();
 
 WP_CLI::success( sprintf( 'menu %d, header %d, footer %d, home %d', $menu_id, $header_id, $footer_id, $home_id ) );

@@ -448,6 +448,118 @@ body {
 	text-transform: uppercase;
 }
 
+/* ---------- Motion ---------- */
+
+/* Home overlay stack: each full-screen section stays pinned while the next
+   slides over it; elvane.js sets --elvane-covered (0 → 1) on the covered one. */
+.elvane-stack.e-con {
+	position: sticky !important;
+	top: 0;
+	z-index: 1;
+	height: 100vh;
+	height: 100svh;
+	background: var(--elvane-white);
+}
+
+.elvane-stack.e-con ~ .e-con {
+	position: relative;
+	z-index: 2;
+}
+
+.elvane-stack.e-con ~ .elvane-stack.e-con {
+	z-index: 2;
+}
+
+.elvane-stack .elvane-hero__img img,
+.elvane-stack .elvane-tile__img img {
+	transform: translate3d(0, calc(var(--elvane-covered, 0) * -12%), 0) scale(calc(1 + var(--elvane-covered, 0) * 0.04));
+	filter: brightness(calc(1 - var(--elvane-covered, 0) * 0.25));
+	will-change: transform;
+}
+
+.elvane-split.elvane-stack .elvane-tile--half.e-con {
+	height: 100%;
+}
+
+/* The section that slides over the stack needs its own background */
+.elvane-section.e-con {
+	background: var(--elvane-white);
+}
+
+/* Images fade in once loaded */
+.elvane-fade {
+	opacity: 0;
+	transition: opacity 0.7s var(--elvane-ease);
+}
+
+.elvane-fade.elvane-loaded {
+	opacity: 1;
+}
+
+/* Slow zoom on tile hover, like the reference collection tiles */
+.elvane-tile__img img {
+	transition: transform 1.2s var(--elvane-ease), opacity 0.7s var(--elvane-ease);
+}
+
+.elvane-tile:not(.elvane-stack):hover .elvane-tile__img img,
+.elvane-split .elvane-tile--half:hover .elvane-tile__img img {
+	transform: scale(1.04);
+}
+
+/* Captions, headings and product cards rise in as they enter the viewport */
+.elvane-reveal {
+	opacity: 0;
+	transform: translate3d(0, 24px, 0);
+	transition: opacity 0.8s var(--elvane-ease), transform 0.8s var(--elvane-ease);
+}
+
+.elvane-reveal.is-visible {
+	opacity: 1;
+	transform: none;
+}
+
+/* Captions are absolutely centred; keep their transform for the reveal only */
+.elvane-hero__caption.elvane-reveal,
+.elvane-tile__caption.elvane-reveal {
+	transition-delay: 0.15s;
+}
+
+ul.products li.product.elvane-reveal:nth-child(4n + 2) {
+	transition-delay: 0.08s;
+}
+
+ul.products li.product.elvane-reveal:nth-child(4n + 3) {
+	transition-delay: 0.16s;
+}
+
+ul.products li.product.elvane-reveal:nth-child(4n) {
+	transition-delay: 0.24s;
+}
+
+/* Product grid image: gentle zoom on hover */
+.woocommerce ul.products li.product .vamtam-thumb-wrapper > img {
+	transition: transform 1s var(--elvane-ease), opacity 0.7s var(--elvane-ease);
+}
+
+.woocommerce ul.products li.product:hover .vamtam-thumb-wrapper > img {
+	transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.elvane-fade,
+	.elvane-reveal {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
+
+	.elvane-stack .elvane-hero__img img,
+	.elvane-stack .elvane-tile__img img {
+		transform: none !important;
+		filter: none !important;
+	}
+}
+
 /* ---------- Product grid (shop, categories, home) ---------- */
 
 .woocommerce ul.products,

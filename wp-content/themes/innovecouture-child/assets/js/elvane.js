@@ -10,6 +10,70 @@
 	onScroll();
 	window.addEventListener( 'scroll', onScroll, { passive: true } );
 
+	var reduceMotion = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+
+	// Fade images in once they have loaded (tiles, hero, product grid).
+	document.querySelectorAll( '.elvane-hero img, .elvane-tile img, ul.products li.product img' ).forEach( function ( img ) {
+		var done = function () {
+			img.classList.add( 'elvane-loaded' );
+		};
+		img.classList.add( 'elvane-fade' );
+		if ( img.complete && img.naturalWidth ) {
+			done();
+		} else {
+			img.addEventListener( 'load', done, { once: true } );
+			img.addEventListener( 'error', done, { once: true } );
+		}
+	} );
+
+	// Reveal captions and product cards as they enter the viewport.
+	var revealTargets = document.querySelectorAll(
+		'.elvane-hero__caption, .elvane-tile__caption, .elvane-section__head, ul.products li.product'
+	);
+	if ( ! reduceMotion && 'IntersectionObserver' in window ) {
+		var observer = new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				if ( entry.isIntersecting ) {
+					entry.target.classList.add( 'is-visible' );
+					observer.unobserve( entry.target );
+				}
+			} );
+		}, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 } );
+		revealTargets.forEach( function ( el ) {
+			el.classList.add( 'elvane-reveal' );
+			observer.observe( el );
+		} );
+	}
+
+	// Home: full-screen sections stack over each other (CSS sticky). While a
+	// section is being covered, its photo drifts up slightly and dims.
+	var stack = Array.prototype.slice.call( document.querySelectorAll( '.elvane-stack' ) );
+	if ( ! reduceMotion && stack.length ) {
+		var ticking = false;
+		var update = function () {
+			ticking = false;
+			var vh = window.innerHeight;
+			stack.forEach( function ( section, i ) {
+				var next = stack[ i + 1 ] || section.nextElementSibling;
+				if ( ! next ) {
+					return;
+				}
+				var covered = 1 - next.getBoundingClientRect().top / vh;
+				covered = Math.min( 1, Math.max( 0, covered ) );
+				section.style.setProperty( '--elvane-covered', covered.toFixed( 3 ) );
+			} );
+		};
+		var request = function () {
+			if ( ! ticking ) {
+				ticking = true;
+				window.requestAnimationFrame( update );
+			}
+		};
+		update();
+		window.addEventListener( 'scroll', request, { passive: true } );
+		window.addEventListener( 'resize', request );
+	}
+
 	// Product page: turn the WooCommerce tabs into stacked accordions (first one open).
 	var tabs = document.querySelector( '.single-product .summary .woocommerce-tabs' );
 	if ( tabs ) {

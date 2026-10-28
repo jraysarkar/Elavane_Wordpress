@@ -145,7 +145,8 @@ def build_footer():
 def build_home():
 	return [
 		# Hero: two portraits side by side with the brand line over them.
-		container("home-hero", "elvane-hero", [
+		# Sections marked elvane-stack stay pinned while the next one slides over them.
+		container("home-hero", "elvane-hero elvane-stack", [
 			widget("home-hero-l", "image", "elvane-hero__img", image=image("hero_left"), image_size="full",
 				link_to="custom", link=link("/shop/")),
 			widget("home-hero-r", "image", "elvane-hero__img", image=image("hero_right"), image_size="full",
@@ -156,8 +157,9 @@ def build_home():
 				text_link("home-hero-cta", "Shop now", "/shop/", "elvane-tile__cta"),
 			]),
 		]),
-		media_tile("home-trousers", "trousers", "Trousers", "Shop collection", "/product-category/trousers/"),
-		container("home-split", "elvane-split", [
+		media_tile("home-trousers", "trousers", "Trousers", "Shop collection", "/product-category/trousers/",
+			"elvane-tile elvane-stack"),
+		container("home-split", "elvane-split elvane-stack", [
 			media_tile("home-cargo", "cargo", "Cargo", "Shop now", "/product-category/trousers/cargo/",
 				"elvane-tile elvane-tile--half"),
 			media_tile("home-polo", "polo", "Polos", "Shop now", "/product-category/t-shirt/polo/",

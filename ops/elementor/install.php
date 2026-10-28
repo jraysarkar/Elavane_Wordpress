@@ -119,8 +119,10 @@ if ( $wishlist ) {
 		'ID'           => $wishlist->ID,
 		'post_content' => "<!-- wp:shortcode -->\n[woosw_list]\n<!-- /wp:shortcode -->",
 	) );
-	$settings            = (array) get_option( 'woosw_settings', array() );
-	$settings['page_id'] = $wishlist->ID;
+	$settings               = (array) get_option( 'woosw_settings', array() );
+	$settings['page_id']    = $wishlist->ID;
+	$settings['page_share'] = 'no'; // No "Share on" icons
+	$settings['page_copy']  = 'no'; // No "Wishlist link: … Copy" bar
 	update_option( 'woosw_settings', $settings );
 }
 

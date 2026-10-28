@@ -26,6 +26,10 @@ function elvane_delivery_charge_by_payment( $rates, $package ) {
 	}
 
 	$method = (string) WC()->session->get( 'chosen_payment_method' );
+	if ( '' === $method ) {
+		// Nothing chosen yet: checkout preselects the first enabled method, so price for that.
+		$method = elvane_default_payment_method();
+	}
 
 	foreach ( $rates as $rate ) {
 		if ( false !== strpos( $method, 'razorpay' ) ) {
@@ -41,6 +45,22 @@ function elvane_delivery_charge_by_payment( $rates, $package ) {
 	return $rates;
 }
 add_filter( 'woocommerce_package_rates', 'elvane_delivery_charge_by_payment', 100, 2 );
+
+/**
+ * First enabled payment method in the store's gateway order — what checkout
+ * preselects. Reads settings only (no availability checks, which could recurse
+ * into shipping calculation).
+ *
+ * @return string
+ */
+function elvane_default_payment_method() {
+	foreach ( WC()->payment_gateways()->payment_gateways() as $id => $gateway ) {
+		if ( 'yes' === $gateway->enabled ) {
+			return (string) $id;
+		}
+	}
+	return '';
+}
 
 /**
  * Recalculate shipping for the chosen payment method.

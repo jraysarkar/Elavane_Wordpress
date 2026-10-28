@@ -9,6 +9,7 @@
 	}
 
 	var saved = '';
+	var pending = '';
 
 	var refreshCart = function () {
 		if ( window.wp && wp.apiFetch && wp.data ) {
@@ -19,10 +20,10 @@
 	};
 
 	var save = function ( method ) {
-		if ( ! method || method === saved ) {
+		if ( ! method || method === saved || method === pending ) {
 			return;
 		}
-		saved = method;
+		pending = method;
 		var body = new URLSearchParams();
 		body.append( 'action', 'elvane_set_checkout_payment' );
 		body.append( 'security', settings.security );
@@ -33,29 +34,55 @@
 			} )
 			.then( function ( json ) {
 				if ( json && json.success ) {
+					saved = method;
 					refreshCart();
 				}
 			} )
-			.catch( function () {
-				saved = '';
+			.catch( function () {} )
+			.then( function () {
+				pending = '';
 			} );
 	};
 
-	// Prefer the checkout block's own state; fall back to the radio buttons.
+	// The selected method: from the checkout block's store, else the checked radio.
+	var current = function () {
+		var method = '';
+		if ( window.wp && wp.data && wp.data.select ) {
+			try {
+				var store = wp.data.select( 'wc/store/payment' );
+				method = store && store.getActivePaymentMethod ? store.getActivePaymentMethod() : '';
+			} catch ( e ) {}
+		}
+		if ( ! method ) {
+			var radio = document.querySelector( '.wc-block-checkout__payment-method input[type="radio"]:checked, input[name*="payment-method"]:checked' );
+			method = radio ? radio.value : '';
+		}
+		return method;
+	};
+
+	var sync = function () {
+		save( current() );
+	};
+
+	// The checkout block renders after this script runs, and with a single
+	// payment method there is never a "change" event — so keep checking until
+	// a method is selected, then follow every later change.
+	var attempts = 0;
+	var poll = window.setInterval( function () {
+		attempts += 1;
+		sync();
+		if ( saved || attempts > 60 ) {
+			window.clearInterval( poll );
+		}
+	}, 250 );
+
 	if ( window.wp && wp.data && wp.data.subscribe ) {
-		wp.data.subscribe( function () {
-			var store = wp.data.select( 'wc/store/payment' );
-			var method = store && store.getActivePaymentMethod && store.getActivePaymentMethod();
-			if ( method ) {
-				save( method );
-			}
-		} );
+		wp.data.subscribe( sync );
 	}
 
 	document.addEventListener( 'change', function ( event ) {
-		var input = event.target;
-		if ( input && input.type === 'radio' && input.name && input.name.indexOf( 'payment-method' ) !== -1 ) {
-			save( input.value );
+		if ( event.target && event.target.type === 'radio' ) {
+			window.setTimeout( sync, 0 );
 		}
 	} );
 } )();

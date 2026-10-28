@@ -106,7 +106,8 @@ def build_header():
 					link_to="custom", link=link("/")),
 			]),
 			container("hdr-r", "elvane-header__right", [
-				text_link("hdr-account", "Login", "/my-account/", "elvane-textlink elvane-hide-mobile"),
+				# Label switches to "Account" for logged-in customers (CSS).
+				text_link("hdr-account", "Login", "/my-account/", "elvane-textlink elvane-account-link elvane-hide-mobile"),
 				widget("hdr-search", "shortcode", "elvane-search", shortcode='[fibosearch layout="icon"]'),
 				text_link("hdr-wishlist", "Wishlist", "/wishlist/", "elvane-textlink elvane-hide-mobile"),
 				widget("hdr-cart", "shortcode", "elvane-bag", shortcode="[xoo_wsc_cart]"),

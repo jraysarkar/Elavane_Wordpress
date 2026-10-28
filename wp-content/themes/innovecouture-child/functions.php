@@ -32,6 +32,15 @@ function elvane_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/css/elvane.css' )
 	);
 
+	if ( elvane_is_store_page() ) {
+		wp_enqueue_style(
+			'elvane-store-pages',
+			$uri . '/assets/css/elvane-store-pages.css',
+			array( 'elvane-child' ),
+			(string) filemtime( $dir . '/assets/css/elvane-store-pages.css' )
+		);
+	}
+
 	wp_enqueue_script(
 		'elvane-child',
 		$uri . '/assets/js/elvane.js',
@@ -41,6 +50,44 @@ function elvane_enqueue_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'elvane_enqueue_assets', 20 );
+
+/**
+ * Cart, checkout, account, wishlist and order-tracking pages share one stylesheet.
+ *
+ * @return bool
+ */
+function elvane_is_store_page() {
+	if ( ! function_exists( 'is_woocommerce' ) ) {
+		return false;
+	}
+	return is_cart() || is_checkout() || is_account_page() || is_page( array( 'wishlist', 'order-tracking' ) );
+}
+
+/**
+ * Body class for the store pages above, used by the stylesheet.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function elvane_store_page_class( $classes ) {
+	if ( elvane_is_store_page() ) {
+		$classes[] = 'elvane-store-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'elvane_store_page_class' );
+
+/**
+ * No downloadable products are sold, so hide "Downloads" in My account (as on live).
+ *
+ * @param array $items Account menu items.
+ * @return array
+ */
+function elvane_account_menu_items( $items ) {
+	unset( $items['downloads'] );
+	return $items;
+}
+add_filter( 'woocommerce_account_menu_items', 'elvane_account_menu_items', 999 );
 
 /**
  * Portrait 3:4 product grid images (the parent theme registers 360×360 squares).

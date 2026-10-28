@@ -36,6 +36,25 @@ function elvane_parse_icarry_note( $text ) {
 }
 
 /**
+ * Shipment statuses shown to customers. "booked" is set when iCarry books the
+ * courier; later stages are set from iCarry's status (see the status sync).
+ *
+ * @return array status key => label
+ */
+function elvane_shipment_statuses() {
+	return array(
+		'booked'           => __( 'Awaiting pickup', 'elvane-store' ),
+		'picked_up'        => __( 'Picked up', 'elvane-store' ),
+		'in_transit'       => __( 'In transit', 'elvane-store' ),
+		'out_for_delivery' => __( 'Out for delivery', 'elvane-store' ),
+		'delivered'        => __( 'Delivered', 'elvane-store' ),
+		'returned'         => __( 'Returned to us', 'elvane-store' ),
+		'cancelled'        => __( 'Shipment cancelled', 'elvane-store' ),
+		'exception'        => __( 'Delayed — we are on it', 'elvane-store' ),
+	);
+}
+
+/**
  * Shipment saved on the order, else parsed from an existing iCarry note.
  *
  * @param WC_Order $order Order.
@@ -49,6 +68,7 @@ function elvane_order_shipment( $order ) {
 			'awb'     => $awb,
 			'url'     => $order->get_meta( '_elvane_shipment_url' ),
 			'booked'  => $order->get_meta( '_elvane_shipment_booked' ),
+			'status'  => $order->get_meta( '_elvane_shipment_status' ) ? $order->get_meta( '_elvane_shipment_status' ) : 'booked',
 		);
 	}
 	// Orders booked before this code existed: read the latest iCarry note.
@@ -56,6 +76,7 @@ function elvane_order_shipment( $order ) {
 		$parsed = elvane_parse_icarry_note( $note->comment_content );
 		if ( $parsed ) {
 			$parsed['booked'] = $note->comment_date_gmt;
+			$parsed['status'] = 'booked';
 			return $parsed;
 		}
 	}
@@ -74,12 +95,25 @@ function elvane_save_shipment( $order, $shipment ) {
 	$order->update_meta_data( '_elvane_shipment_awb', $shipment['awb'] );
 	$order->update_meta_data( '_elvane_shipment_url', $shipment['url'] );
 	$order->update_meta_data( '_elvane_shipment_booked', $now );
+	$order->update_meta_data( '_elvane_shipment_status', 'booked' );
 	// YITH Order Tracking (used by the Track order page and its emails).
 	$order->update_meta_data( 'ywot_carrier_name', $shipment['courier'] );
 	$order->update_meta_data( 'ywot_tracking_code', $shipment['awb'] );
 	$order->update_meta_data( 'ywot_carrier_url', $shipment['url'] );
 	$order->update_meta_data( 'ywot_pick_up_date', gmdate( 'Y-m-d' ) );
 	$order->save();
+}
+
+/**
+ * Label for a shipment's status.
+ *
+ * @param array $shipment Shipment.
+ * @return string
+ */
+function elvane_shipment_status_label( $shipment ) {
+	$all = elvane_shipment_statuses();
+	$key = isset( $shipment['status'] ) && isset( $all[ $shipment['status'] ] ) ? $shipment['status'] : 'booked';
+	return $all[ $key ];
 }
 
 /**
@@ -184,6 +218,10 @@ function elvane_render_shipment_card( $order ) {
 				<dt><?php esc_html_e( 'Tracking number (AWB)', 'elvane-store' ); ?></dt>
 				<dd class="elvane-shipment__awb"><?php echo esc_html( $shipment['awb'] ); ?></dd>
 			</div>
+			<div>
+				<dt><?php esc_html_e( 'Status', 'elvane-store' ); ?></dt>
+				<dd><span class="elvane-ship-status elvane-ship-status--<?php echo esc_attr( $shipment['status'] ); ?>"><?php echo esc_html( elvane_shipment_status_label( $shipment ) ); ?></span></dd>
+			</div>
 		</dl>
 		<a class="elvane-shipment__track button" href="<?php echo esc_url( $shipment['url'] ); ?>" target="_blank" rel="noopener noreferrer">
 			<?php esc_html_e( 'Track shipment', 'elvane-store' ); ?>
@@ -239,10 +277,12 @@ add_action( 'woocommerce_my_account_my_orders_column_order-tracking', function (
 		return;
 	}
 	printf(
-		'<a class="elvane-track-link" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a><span class="elvane-muted elvane-track-courier">%3$s</span>',
+		'<a class="elvane-track-link" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a><span class="elvane-muted elvane-track-courier">%3$s</span><span class="elvane-ship-status elvane-ship-status--%4$s">%5$s</span>',
 		esc_url( $shipment['url'] ),
 		esc_html__( 'Track', 'elvane-store' ),
-		esc_html( $shipment['courier'] )
+		esc_html( $shipment['courier'] ),
+		esc_attr( $shipment['status'] ),
+		esc_html( elvane_shipment_status_label( $shipment ) )
 	);
 } );
 
@@ -254,11 +294,12 @@ add_action( 'woocommerce_admin_order_data_after_shipping_address', function ( $o
 		return;
 	}
 	printf(
-		'<p><strong>%1$s</strong><br>%2$s · %3$s <a href="%4$s" target="_blank" rel="noopener noreferrer">%5$s</a></p>',
+		'<p><strong>%1$s</strong><br>%2$s · %3$s · %6$s <a href="%4$s" target="_blank" rel="noopener noreferrer">%5$s</a></p>',
 		esc_html__( 'Shipment (iCarry)', 'elvane-store' ),
 		esc_html( $shipment['courier'] ),
 		esc_html( $shipment['awb'] ),
 		esc_url( $shipment['url'] ),
-		esc_html__( 'Track', 'elvane-store' )
+		esc_html__( 'Track', 'elvane-store' ),
+		esc_html( elvane_shipment_status_label( $shipment ) )
 	);
 } );

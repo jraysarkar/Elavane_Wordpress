@@ -1078,3 +1078,130 @@
 		width: 100%;
 	}
 }
+
+/* Shipment status badge (Tracking column and Shipment card) */
+.elvane-store-page .elvane-ship-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 4px;
+	color: var(--elvane-black);
+	font: 500 11px/1.3 var(--elvane-font);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.elvane-store-page .elvane-ship-status::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	background: #c58a00;
+	border-radius: 50%;
+}
+
+.elvane-store-page .elvane-ship-status--picked_up::before,
+.elvane-store-page .elvane-ship-status--in_transit::before,
+.elvane-store-page .elvane-ship-status--out_for_delivery::before {
+	background: #2b6cb0;
+}
+
+.elvane-store-page .elvane-ship-status--delivered::before {
+	background: #1e7a3c;
+}
+
+.elvane-store-page .elvane-ship-status--returned::before,
+.elvane-store-page .elvane-ship-status--cancelled::before,
+.elvane-store-page .elvane-ship-status--exception::before {
+	background: var(--elvane-sale);
+}
+
+.elvane-store-page td .elvane-ship-status {
+	display: flex;
+}
+
+.elvane-store-page .elvane-shipment__details .elvane-ship-status {
+	margin-top: 0;
+	font-size: 13px;
+	text-transform: none;
+}
+
+/* My account → Orders on phones: one compact card per order */
+@media (max-width: 767px) {
+	.woocommerce-account table.woocommerce-orders-table,
+	.woocommerce-account table.woocommerce-orders-table tbody {
+		display: block;
+		width: 100%;
+	}
+
+	.woocommerce-account table.woocommerce-orders-table tr.woocommerce-orders-table__row {
+		display: grid;
+		grid-template-areas:
+			"number status"
+			"date   date"
+			"total  total"
+			"track  actions";
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 4px 16px;
+		padding: 18px 0;
+		border-bottom: 1px solid var(--elvane-line);
+	}
+
+	.woocommerce-account table.woocommerce-orders-table tr.woocommerce-orders-table__row > * {
+		display: block !important;
+		width: auto !important;
+		padding: 0 !important;
+		border: 0 !important;
+		background: none !important;
+		text-align: left !important;
+	}
+
+	.woocommerce-account table.woocommerce-orders-table tr.woocommerce-orders-table__row > *::before {
+		display: none !important;
+		content: none !important;
+	}
+
+	.woocommerce-orders-table__cell-order-number {
+		grid-area: number;
+		font: 600 14px/1.3 var(--elvane-font);
+	}
+
+	.woocommerce-orders-table__cell-order-status {
+		grid-area: status;
+		justify-self: end;
+		font: 500 11px/1.3 var(--elvane-font);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.woocommerce-orders-table__cell-order-date {
+		grid-area: date;
+		color: var(--elvane-grey-text);
+		font-size: 12px;
+	}
+
+	.woocommerce-orders-table__cell-order-total {
+		grid-area: total;
+		font-size: 13px;
+	}
+
+	.woocommerce-orders-table__cell-order-tracking {
+		grid-area: track;
+		margin-top: 8px;
+	}
+
+	.woocommerce-orders-table__cell-order-tracking .elvane-track-courier {
+		display: inline;
+		margin-left: 6px;
+	}
+
+	.woocommerce-orders-table__cell-order-actions {
+		grid-area: actions;
+		justify-self: end;
+		margin-top: 8px;
+	}
+
+	.woocommerce-orders-table__cell-order-actions .button {
+		margin: 0 !important;
+	}
+}

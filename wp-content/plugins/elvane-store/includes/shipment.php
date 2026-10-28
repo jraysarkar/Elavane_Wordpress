@@ -43,7 +43,8 @@ function elvane_parse_icarry_note( $text ) {
  */
 function elvane_shipment_statuses() {
 	return array(
-		'booked'           => __( 'Awaiting pickup', 'elvane-store' ),
+		// iCarry only reports bookings, so this is all we know until someone updates it.
+		'booked'           => __( 'Booked · see live status', 'elvane-store' ),
 		'picked_up'        => __( 'Picked up', 'elvane-store' ),
 		'in_transit'       => __( 'In transit', 'elvane-store' ),
 		'out_for_delivery' => __( 'Out for delivery', 'elvane-store' ),
@@ -90,7 +91,7 @@ function elvane_order_shipment( $order ) {
  * @param array    $shipment { courier, awb, url }.
  */
 function elvane_save_shipment( $order, $shipment ) {
-	$now = gmdate( 'Y-m-d H:i:s' );
+	$now = ! empty( $shipment['booked'] ) ? $shipment['booked'] : gmdate( 'Y-m-d H:i:s' );
 	$order->update_meta_data( '_elvane_shipment_courier', $shipment['courier'] );
 	$order->update_meta_data( '_elvane_shipment_awb', $shipment['awb'] );
 	$order->update_meta_data( '_elvane_shipment_url', $shipment['url'] );
@@ -288,18 +289,77 @@ add_action( 'woocommerce_my_account_my_orders_column_order-tracking', function (
 
 /* ---------- Admin: shipment details on the order screen ---------- */
 
+/**
+ * Admin order screen: shipment details and a status dropdown. iCarry does not
+ * report pickups, deliveries or cancellations to the store, so the shop can set
+ * the status here (the coming status sync will do it automatically).
+ */
 add_action( 'woocommerce_admin_order_data_after_shipping_address', function ( $order ) {
 	$shipment = elvane_order_shipment( $order );
 	if ( ! $shipment ) {
 		return;
 	}
 	printf(
-		'<p><strong>%1$s</strong><br>%2$s · %3$s · %6$s <a href="%4$s" target="_blank" rel="noopener noreferrer">%5$s</a></p>',
+		'<p><strong>%1$s</strong><br>%2$s · %3$s · <a href="%4$s" target="_blank" rel="noopener noreferrer">%5$s</a></p>',
 		esc_html__( 'Shipment (iCarry)', 'elvane-store' ),
 		esc_html( $shipment['courier'] ),
 		esc_html( $shipment['awb'] ),
 		esc_url( $shipment['url'] ),
-		esc_html__( 'Track', 'elvane-store' ),
-		esc_html( elvane_shipment_status_label( $shipment ) )
+		esc_html__( 'Track', 'elvane-store' )
 	);
+	echo '<p class="form-field form-field-wide"><label for="elvane_shipment_status">' . esc_html__( 'Shipment status (shown to the customer)', 'elvane-store' ) . '</label>';
+	echo '<select name="elvane_shipment_status" id="elvane_shipment_status">';
+	foreach ( elvane_shipment_statuses() as $key => $label ) {
+		printf( '<option value="%1$s"%2$s>%3$s</option>', esc_attr( $key ), selected( $shipment['status'], $key, false ), esc_html( $label ) );
+	}
+	echo '</select></p>';
+	wp_nonce_field( 'elvane_shipment_status', 'elvane_shipment_status_nonce' );
 } );
+
+/**
+ * Save the shipment status from the admin order screen (classic and HPOS).
+ *
+ * @param int $order_id Order id.
+ */
+function elvane_save_admin_shipment_status( $order_id ) {
+	if ( ! isset( $_POST['elvane_shipment_status'], $_POST['elvane_shipment_status_nonce'] )
+		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['elvane_shipment_status_nonce'] ) ), 'elvane_shipment_status' )
+		|| ! current_user_can( 'edit_shop_orders' ) ) {
+		return;
+	}
+	$status = sanitize_key( wp_unslash( $_POST['elvane_shipment_status'] ) );
+	$order  = wc_get_order( $order_id );
+	if ( ! $order || ! array_key_exists( $status, elvane_shipment_statuses() ) ) {
+		return;
+	}
+	elvane_set_shipment_status( $order, $status, __( 'set by the shop', 'elvane-store' ) );
+}
+add_action( 'woocommerce_process_shop_order_meta', 'elvane_save_admin_shipment_status', 50 );
+
+/**
+ * Change a shipment's status and note who changed it (private note).
+ *
+ * @param WC_Order $order  Order.
+ * @param string   $status Status key.
+ * @param string   $source Who or what changed it.
+ */
+function elvane_set_shipment_status( $order, $status, $source ) {
+	$shipment = elvane_order_shipment( $order );
+	if ( ! $shipment || $shipment['status'] === $status ) {
+		return;
+	}
+	if ( ! $order->get_meta( '_elvane_shipment_awb' ) ) {
+		// Shipment known only from an old iCarry note: save it properly first.
+		elvane_save_shipment( $order, $shipment );
+	}
+	$order->update_meta_data( '_elvane_shipment_status', $status );
+	$order->save();
+	$order->add_order_note(
+		sprintf(
+			/* translators: 1: status, 2: who changed it */
+			__( 'Shipment status: %1$s (%2$s).', 'elvane-store' ),
+			elvane_shipment_statuses()[ $status ],
+			$source
+		)
+	);
+}

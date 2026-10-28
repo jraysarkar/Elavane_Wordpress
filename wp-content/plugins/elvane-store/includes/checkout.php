@@ -250,7 +250,11 @@ function elvane_sync_customer_from_order( $order ) {
 	if ( $email && ( ! $owner || (int) $owner === (int) $user_id ) ) {
 		$update['user_email'] = $email;
 	}
+	// Filling in the email from an order is not a change the customer made, so
+	// no "[Elvane Clothing] Email Changed" notice.
+	add_filter( 'send_email_change_email', '__return_false' );
 	wp_update_user( $update );
+	remove_filter( 'send_email_change_email', '__return_false' );
 }
 add_action( 'woocommerce_checkout_order_processed', 'elvane_sync_customer_from_order' );
 add_action( 'woocommerce_store_api_checkout_order_processed', 'elvane_sync_customer_from_order' );

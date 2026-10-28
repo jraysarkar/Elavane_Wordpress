@@ -10,6 +10,7 @@ into a plugin so it keeps working whatever theme is active.
 | `includes/checkout.php`, `assets/checkout-payment.js` | Delivery: COD ₹100 incl. GST, Razorpay free — shown live in the checkout block. |
 | `includes/checkout.php`, `assets/buy-now.js` | "Buy now": only this item, straight to checkout (works with variations). |
 | `includes/checkout.php` | WELCOME200 first order only; name/email copied from the order to the customer; thank-you text. |
+| `includes/gst-labels.php` | Order tax lines named CGST 2.5% / SGST 2.5% or IGST 5% (the GST plugin leaves them as "Tax"); admin "Recalculate" uses the order's own state. Existing orders: `wp elvane gst-labels` (`--dry-run` first). |
 
 ## Setup
 

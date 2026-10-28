@@ -43,7 +43,7 @@ function elvane_parse_icarry_note( $text ) {
  */
 function elvane_shipment_statuses() {
 	return array(
-		// iCarry only reports bookings, so this is all we know until someone updates it.
+		// Until the hourly iCarry sync (shipment-sync.php) sees the next stage.
 		'booked'           => __( 'Booked · see live status', 'elvane-store' ),
 		'picked_up'        => __( 'Picked up', 'elvane-store' ),
 		'in_transit'       => __( 'In transit', 'elvane-store' ),
@@ -290,9 +290,8 @@ add_action( 'woocommerce_my_account_my_orders_column_order-tracking', function (
 /* ---------- Admin: shipment details on the order screen ---------- */
 
 /**
- * Admin order screen: shipment details and a status dropdown. iCarry does not
- * report pickups, deliveries or cancellations to the store, so the shop can set
- * the status here (the coming status sync will do it automatically).
+ * Admin order screen: shipment details and a status dropdown. The hourly iCarry
+ * sync keeps the status current; the shop can also set it here.
  */
 add_action( 'woocommerce_admin_order_data_after_shipping_address', function ( $order ) {
 	$shipment = elvane_order_shipment( $order );

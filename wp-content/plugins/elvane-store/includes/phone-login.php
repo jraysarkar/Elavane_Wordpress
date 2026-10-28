@@ -169,6 +169,22 @@ add_action( 'wp_ajax_nopriv_elvane_phone_login', 'elvane_ajax_phone_login' );
 add_action( 'wp_ajax_elvane_phone_login', 'elvane_ajax_phone_login' );
 
 /**
+ * AJAX: the popup reports a failed step's error code (no phone number or OTP),
+ * so login problems can be diagnosed from the server log.
+ */
+function elvane_ajax_phone_login_error() {
+	$step = isset( $_POST['step'] ) ? sanitize_key( wp_unslash( $_POST['step'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$code = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( in_array( $step, array( 'send', 'resend', 'verify', 'retry' ), true ) ) {
+		error_log( sprintf( 'Elvane phone login (browser): %s failed: %s', $step, substr( $code, 0, 120 ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	}
+	wp_die( '', '', array( 'response' => 204 ) );
+}
+add_action( 'wp_ajax_nopriv_elvane_phone_login_error', 'elvane_ajax_phone_login_error' );
+add_action( 'wp_ajax_elvane_phone_login_error', 'elvane_ajax_phone_login_error' );
+
+
+/**
  * Scripts and styles for the login popup (logged-out visitors only).
  */
 function elvane_phone_login_assets() {

@@ -50,12 +50,19 @@
 		return verifier;
 	};
 
+	// reCAPTCHA refuses to render twice in the same element, even after
+	// clear(), so every new attempt gets a brand-new container.
 	var resetVerifier = function () {
 		if ( verifier ) {
-			verifier.clear();
+			try {
+				verifier.clear();
+			} catch ( e ) {}
 			verifier = null;
 		}
-		document.getElementById( 'elvane-recaptcha' ).innerHTML = '';
+		var old = document.getElementById( 'elvane-recaptcha' );
+		var fresh = document.createElement( 'div' );
+		fresh.id = 'elvane-recaptcha';
+		old.parentNode.replaceChild( fresh, old );
 	};
 
 	var startResendTimer = function () {
@@ -73,6 +80,19 @@
 				resendButton.textContent = t.resendIn.replace( '%s', left );
 			}
 		}, 1000 );
+	};
+
+	// Report the error code (never the number or code) so failures can be diagnosed.
+	var report = function ( step, error ) {
+		try {
+			var body = new URLSearchParams();
+			body.append( 'action', 'elvane_phone_login_error' );
+			body.append( 'step', step );
+			body.append( 'code', ( error && ( error.code || error.message ) ) || 'unknown' );
+			if ( navigator.sendBeacon ) {
+				navigator.sendBeacon( settings.ajaxUrl, body );
+			}
+		} catch ( e ) {}
 	};
 
 	// Readable message for a Firebase or server error.
@@ -132,6 +152,7 @@
 				startResendTimer();
 			} )
 			.catch( function ( error ) {
+				report( isResend ? 'resend' : 'send', error );
 				resetVerifier();
 				setError( form, messageFor( error, t.sendFailed ) );
 				if ( isResend ) {
@@ -187,6 +208,7 @@
 		if ( confirmedUser ) {
 			setBusy( codeForm, true, t.verifying );
 			loginWithFirebaseUser( confirmedUser ).catch( function ( error ) {
+				report( 'retry', error );
 				setError( codeForm, messageFor( error, t.serverFailed ) );
 				setBusy( codeForm, false, t.verify );
 			} );
@@ -208,6 +230,7 @@
 				return loginWithFirebaseUser( result.user );
 			} )
 			.catch( function ( error ) {
+				report( 'verify', error );
 				setError( codeForm, messageFor( error, t.wrongCode ) );
 				setBusy( codeForm, false, t.verify );
 			} );

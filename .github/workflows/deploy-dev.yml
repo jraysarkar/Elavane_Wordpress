@@ -1,0 +1,43 @@
+name: Deploy to dev
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP syntax check
+        run: find wp-content -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEV_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+      - name: Upload code
+        env:
+          HOST: ${{ secrets.DEV_HOST }}
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" \
+            --exclude '.git' --exclude '.github' \
+            ./ "deploy@${HOST}:/home/deploy/incoming/"
+
+      - name: Run server deploy
+        env:
+          HOST: ${{ secrets.DEV_HOST }}
+        run: ssh -i ~/.ssh/deploy_key "deploy@${HOST}" 'sudo /usr/local/bin/elvane-deploy dev'

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP 8.3 (matches the server)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: none
+
+      - name: PHP syntax check
+        run: find wp-content -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Deploy script syntax check
+        run: bash -n ops/deploy/elvane-deploy.sh
+
+      - name: Block secrets and dumps
+        run: |
+          if git ls-files | grep -E '(wp-config\.php|\.sql(\.gz)?$|\.env$|\.pem$|\.zip$)'; then
+            echo "::error::Secrets, dumps or archives must not be committed"; exit 1
+          fi
+          if git grep -nE 'rzp_(live|test)_[A-Za-z0-9]{8,}|-----BEGIN [A-Z ]*PRIVATE KEY-----' -- ':!.github'; then
+            echo "::error::Looks like a key or secret is committed"; exit 1
+          fi

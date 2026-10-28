@@ -1,0 +1,36 @@
+# Allowlist: only Elvane's own code is versioned.
+# WordPress core, uploads, the database and third-party / premium
+# themes and plugins are NOT committed (licences + secrets + size).
+# Their exact versions are recorded in ops/manifest/.
+
+/*
+!/.gitignore
+!/.editorconfig
+!/README.md
+!/.github/
+!/ops/
+!/wp-content/
+
+/wp-content/*
+!/wp-content/themes/
+!/wp-content/plugins/
+!/wp-content/mu-plugins/
+
+/wp-content/themes/*
+!/wp-content/themes/innovecouture-child/
+
+/wp-content/plugins/*
+!/wp-content/plugins/elvane-*/
+
+# Never commit secrets or dumps, wherever they are
+wp-config.php
+.env
+*.env
+*.sql
+*.sql.gz
+*.zip
+*.log
+*.pem
+id_*
+.DS_Store
+node_modules/

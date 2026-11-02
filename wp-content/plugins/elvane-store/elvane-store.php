@@ -17,6 +17,7 @@ define( 'ELVANE_STORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ELVANE_STORE_URL', plugin_dir_url( __FILE__ ) );
 
 require_once ELVANE_STORE_DIR . 'includes/phone-login.php';
+require_once ELVANE_STORE_DIR . 'includes/account-password.php';
 require_once ELVANE_STORE_DIR . 'includes/checkout.php';
 require_once ELVANE_STORE_DIR . 'includes/account.php';
 require_once ELVANE_STORE_DIR . 'includes/gst-labels.php';

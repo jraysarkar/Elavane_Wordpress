@@ -84,8 +84,41 @@ function elvane_verified_firebase_phone( $id_token ) {
  * @return WP_User|WP_Error
  */
 function elvane_customer_for_phone( $phone ) {
-	$digits   = preg_replace( '/\D/', '', $phone ); // 91XXXXXXXXXX
-	$local    = substr( $digits, -10 );            // XXXXXXXXXX
+	$digits = preg_replace( '/\D/', '', $phone ); // 91XXXXXXXXXX
+	$user   = elvane_find_customer_for_phone( $phone );
+
+	if ( $user ) {
+		if ( ! get_user_meta( $user->ID, 'phone_number', true ) ) {
+			update_user_meta( $user->ID, 'phone_number', $digits );
+		}
+		return $user;
+	}
+
+	$user_id = wp_insert_user(
+		array(
+			'user_login' => $digits,
+			'user_pass'  => wp_generate_password( 32 ),
+			'role'       => 'customer',
+		)
+	);
+	if ( is_wp_error( $user_id ) ) {
+		return $user_id;
+	}
+	update_user_meta( $user_id, 'phone_number', $digits );
+	update_user_meta( $user_id, 'billing_phone', substr( $digits, -10 ) );
+
+	return get_user_by( 'id', $user_id );
+}
+
+/**
+ * Existing account for a phone number (any usual spelling), or null.
+ *
+ * @param string $phone Phone number in any format.
+ * @return WP_User|null
+ */
+function elvane_find_customer_for_phone( $phone ) {
+	$local    = substr( preg_replace( '/\D/', '', $phone ), -10 ); // XXXXXXXXXX (drops +91, 91 or 0)
+	$digits   = '91' . $local;                                      // 91XXXXXXXXXX
 	$variants = array_unique( array( $digits, '+' . $digits, $local, '0' . $local ) );
 
 	foreach ( array( 'phone_number', 'billing_phone' ) as $meta_key ) {
@@ -118,27 +151,7 @@ function elvane_customer_for_phone( $phone ) {
 		}
 	}
 
-	if ( ! empty( $user ) ) {
-		if ( ! get_user_meta( $user->ID, 'phone_number', true ) ) {
-			update_user_meta( $user->ID, 'phone_number', $digits );
-		}
-		return $user;
-	}
-
-	$user_id = wp_insert_user(
-		array(
-			'user_login' => $digits,
-			'user_pass'  => wp_generate_password( 32 ),
-			'role'       => 'customer',
-		)
-	);
-	if ( is_wp_error( $user_id ) ) {
-		return $user_id;
-	}
-	update_user_meta( $user_id, 'phone_number', $digits );
-	update_user_meta( $user_id, 'billing_phone', $local );
-
-	return get_user_by( 'id', $user_id );
+	return empty( $user ) ? null : $user;
 }
 
 /**
@@ -152,6 +165,26 @@ function elvane_ajax_phone_login() {
 		wp_send_json_error( array( 'message' => __( 'Could not verify the code. Please try again.', 'elvane-store' ) ), 403 );
 	}
 
+	// Already logged in: this confirms it is the account holder (e.g. before
+	// setting a password), so the number must be this account's number.
+	if ( is_user_logged_in() ) {
+		$current = wp_get_current_user();
+		$owner   = elvane_find_customer_for_phone( $phone );
+		if ( $owner && (int) $owner->ID !== (int) $current->ID ) {
+			wp_send_json_error( array( 'message' => __( 'This number belongs to a different account.', 'elvane-store' ) ), 409 );
+		}
+		$saved = preg_replace( '/\D/', '', (string) get_user_meta( $current->ID, 'phone_number', true ) );
+		if ( $saved && substr( $saved, -10 ) !== substr( $phone, -10 ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please use the mobile number on your account.', 'elvane-store' ) ), 409 );
+		}
+		if ( ! $saved ) {
+			update_user_meta( $current->ID, 'phone_number', preg_replace( '/\D/', '', $phone ) );
+		}
+		elvane_mark_otp_verified( $current->ID );
+		$return = isset( $_POST['redirect_to'] ) ? elvane_login_return_url( wp_unslash( $_POST['redirect_to'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		wp_send_json_success( array( 'redirect' => $return ) );
+	}
+
 	$user = elvane_customer_for_phone( $phone );
 	if ( is_wp_error( $user ) ) {
 		error_log( 'Elvane phone login: could not get account for ' . substr( $phone, 0, 5 ) . '…: ' . $user->get_error_code() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
@@ -161,6 +194,7 @@ function elvane_ajax_phone_login() {
 	wp_set_current_user( $user->ID );
 	wp_set_auth_cookie( $user->ID, true );
 	do_action( 'wp_login', $user->user_login, $user );
+	elvane_mark_otp_verified( $user->ID );
 
 	$return = isset( $_POST['redirect_to'] ) ? elvane_login_return_url( wp_unslash( $_POST['redirect_to'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	wp_send_json_success( array( 'redirect' => $return ) );
@@ -185,11 +219,24 @@ add_action( 'wp_ajax_elvane_phone_login_error', 'elvane_ajax_phone_login_error' 
 
 
 /**
- * Scripts and styles for the login popup (logged-out visitors only).
+ * Whether this page needs the login popup: logged-out visitors everywhere,
+ * logged-in customers only on Account details (to confirm it is them by OTP).
+ *
+ * @return bool
+ */
+function elvane_phone_login_wanted() {
+	if ( ! is_user_logged_in() ) {
+		return true;
+	}
+	return function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'edit-account' );
+}
+
+/**
+ * Scripts and styles for the login popup.
  */
 function elvane_phone_login_assets() {
 	$config = elvane_firebase_config();
-	if ( is_user_logged_in() || ! $config ) {
+	if ( ! $config || ! elvane_phone_login_wanted() ) {
 		return;
 	}
 
@@ -208,7 +255,9 @@ function elvane_phone_login_assets() {
 		array(
 			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 			'firebase'   => array_intersect_key( $config, array_flip( array( 'apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId' ) ) ),
-			'accountUrl' => wc_get_page_permalink( 'myaccount' ),
+			// Logged in, the popup only re-verifies, so account links stay normal links.
+			'accountUrl' => is_user_logged_in() ? '' : wc_get_page_permalink( 'myaccount' ),
+			'editAccountUrl' => wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ),
 			'resendWait' => 30,
 			'i18n'       => array(
 				'invalidPhone' => __( 'Enter a valid 10-digit mobile number.', 'elvane-store' ),
@@ -228,6 +277,10 @@ function elvane_phone_login_assets() {
 				'success'      => __( 'Signed in', 'elvane-store' ),
 				'resendIn'     => __( 'Resend code in %ss', 'elvane-store' ),
 				'resend'       => __( 'Resend code', 'elvane-store' ),
+				'signingIn'    => __( 'Logging in…', 'elvane-store' ),
+				'login'        => __( 'Log in', 'elvane-store' ),
+				'missing'      => __( 'Enter your mobile number or email and your password.', 'elvane-store' ),
+				'loginFailed'  => __( 'Could not log in. Please try again.', 'elvane-store' ),
 			),
 		)
 	);
@@ -244,9 +297,11 @@ add_action( 'wp_enqueue_scripts', 'elvane_phone_login_assets', 30 );
  * Login popup markup (hidden until opened).
  */
 function elvane_phone_login_popup() {
-	if ( is_user_logged_in() || ! elvane_firebase_config() ) {
+	if ( ! elvane_firebase_config() || ! elvane_phone_login_wanted() ) {
 		return;
 	}
+	$reverify = is_user_logged_in();
+	$my_phone = $reverify ? substr( preg_replace( '/\D/', '', (string) get_user_meta( get_current_user_id(), 'phone_number', true ) ), -10 ) : '';
 	$image = apply_filters( 'elvane_login_popup_image', wp_get_upload_dir()['baseurl'] . '/2026/05/baggy43.png' );
 	?>
 	<div class="elvane-login" id="elvane-login" role="dialog" aria-modal="true" aria-labelledby="elvane-login-title" hidden>
@@ -257,15 +312,27 @@ function elvane_phone_login_popup() {
 				<button type="button" class="elvane-login__close" data-elvane-login-close aria-label="<?php esc_attr_e( 'Close', 'elvane-store' ); ?>">×</button>
 
 				<form class="elvane-login__step" data-step="phone" novalidate>
-					<p class="elvane-login__eyebrow"><?php esc_html_e( 'Login / Sign up', 'elvane-store' ); ?></p>
-					<h2 class="elvane-login__title" id="elvane-login-title"><?php esc_html_e( 'Don’t get left behind', 'elvane-store' ); ?></h2>
-					<p class="elvane-login__text"><?php esc_html_e( 'Enter your mobile number. We’ll text you a code — no password needed.', 'elvane-store' ); ?></p>
+					<?php if ( $reverify ) : ?>
+						<p class="elvane-login__eyebrow"><?php esc_html_e( 'Verify it’s you', 'elvane-store' ); ?></p>
+						<h2 class="elvane-login__title" id="elvane-login-title"><?php esc_html_e( 'Confirm your number', 'elvane-store' ); ?></h2>
+						<p class="elvane-login__text"><?php esc_html_e( 'We’ll text a code to the mobile number on your account. After that you can set your password.', 'elvane-store' ); ?></p>
+					<?php else : ?>
+						<p class="elvane-login__eyebrow"><?php esc_html_e( 'Login / Sign up', 'elvane-store' ); ?></p>
+						<h2 class="elvane-login__title" id="elvane-login-title"><?php esc_html_e( 'Don’t get left behind', 'elvane-store' ); ?></h2>
+						<p class="elvane-login__text"><?php esc_html_e( 'Enter your mobile number. We’ll text you a code — no password needed.', 'elvane-store' ); ?></p>
+					<?php endif; ?>
+					<p class="elvane-login__notice" data-elvane-forgot-note hidden><?php esc_html_e( 'Log in with a code, then set a new password in Account details.', 'elvane-store' ); ?></p>
 					<label class="elvane-login__phone">
 						<span class="elvane-login__cc">+91</span>
-						<input type="tel" name="phone" inputmode="numeric" autocomplete="tel-national" maxlength="10" pattern="[0-9]{10}" placeholder="<?php esc_attr_e( 'Mobile number', 'elvane-store' ); ?>" required>
+						<input type="tel" name="phone" inputmode="numeric" autocomplete="tel-national" maxlength="10" pattern="[0-9]{10}" placeholder="<?php esc_attr_e( 'Mobile number', 'elvane-store' ); ?>" value="<?php echo esc_attr( $my_phone ); ?>"<?php echo $my_phone ? ' readonly' : ''; ?> required>
 					</label>
 					<p class="elvane-login__error" aria-live="polite"></p>
 					<button type="submit" class="elvane-login__button"><?php esc_html_e( 'Continue', 'elvane-store' ); ?></button>
+					<?php if ( ! $reverify ) : ?>
+						<p class="elvane-login__switch">
+							<button type="button" class="elvane-login__link" data-elvane-goto="password"><?php esc_html_e( 'Log in with password instead', 'elvane-store' ); ?></button>
+						</p>
+					<?php endif; ?>
 					<p class="elvane-login__legal">
 						<?php
 						printf(
@@ -277,6 +344,30 @@ function elvane_phone_login_popup() {
 						?>
 					</p>
 				</form>
+
+				<?php if ( ! $reverify ) : ?>
+					<form class="elvane-login__step" data-step="password" hidden novalidate>
+						<p class="elvane-login__eyebrow"><?php esc_html_e( 'Login', 'elvane-store' ); ?></p>
+						<h2 class="elvane-login__title"><?php esc_html_e( 'Log in with password', 'elvane-store' ); ?></h2>
+						<p class="elvane-login__text"><?php esc_html_e( 'Use the mobile number or email on your account.', 'elvane-store' ); ?></p>
+						<label class="elvane-login__field">
+							<span class="screen-reader-text"><?php esc_html_e( 'Mobile number or email', 'elvane-store' ); ?></span>
+							<input type="text" name="login" autocomplete="username" placeholder="<?php esc_attr_e( 'Mobile number or email', 'elvane-store' ); ?>" required>
+						</label>
+						<label class="elvane-login__field elvane-login__field--password">
+							<span class="screen-reader-text"><?php esc_html_e( 'Password', 'elvane-store' ); ?></span>
+							<input type="password" name="password" autocomplete="current-password" placeholder="<?php esc_attr_e( 'Password', 'elvane-store' ); ?>" required>
+							<button type="button" class="elvane-login__reveal" data-elvane-reveal aria-label="<?php esc_attr_e( 'Show password', 'elvane-store' ); ?>"><?php esc_html_e( 'Show', 'elvane-store' ); ?></button>
+						</label>
+						<p class="elvane-login__error" aria-live="polite"></p>
+						<button type="submit" class="elvane-login__button"><?php esc_html_e( 'Log in', 'elvane-store' ); ?></button>
+						<p class="elvane-login__switch">
+							<button type="button" class="elvane-login__link" data-elvane-forgot><?php esc_html_e( 'Forgot password?', 'elvane-store' ); ?></button>
+							<span aria-hidden="true">·</span>
+							<button type="button" class="elvane-login__link" data-elvane-goto="phone"><?php esc_html_e( 'Log in with a code', 'elvane-store' ); ?></button>
+						</p>
+					</form>
+				<?php endif; ?>
 
 				<form class="elvane-login__step" data-step="code" hidden novalidate>
 					<p class="elvane-login__eyebrow"><?php esc_html_e( 'Verify', 'elvane-store' ); ?></p>

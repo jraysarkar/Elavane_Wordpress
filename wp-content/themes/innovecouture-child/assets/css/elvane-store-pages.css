@@ -347,6 +347,42 @@
 	margin-top: 0;
 }
 
+/* Account details: optional email, password section */
+.woocommerce-account .elvane-optional {
+	color: var(--elvane-grey-text);
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+.woocommerce-account .elvane-password__note {
+	margin: 0 0 16px;
+	color: var(--elvane-grey-text);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.woocommerce-account .elvane-password__note--ok {
+	padding: 12px 14px;
+	background: var(--elvane-grey-bg);
+	border-left: 2px solid var(--elvane-black);
+	color: var(--elvane-black);
+}
+
+.woocommerce-account .elvane-password__link {
+	padding: 0;
+	background: none !important;
+	border: 0;
+	color: var(--elvane-black) !important;
+	font: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.woocommerce-account .elvane-password__verify {
+	white-space: normal;
+}
+
 /* Addresses: two bordered cards */
 .woocommerce-account .woocommerce-Addresses {
 	display: grid;

@@ -17,6 +17,8 @@
 	var t = settings.i18n;
 	var phoneForm = root.querySelector( '[data-step="phone"]' );
 	var codeForm = root.querySelector( '[data-step="code"]' );
+	var passwordForm = root.querySelector( '[data-step="password"]' ); // Not shown to logged-in customers.
+	var forgotNote = root.querySelector( '[data-elvane-forgot-note]' );
 	var phoneInput = phoneForm.querySelector( 'input[name="phone"]' );
 	var digits = Array.prototype.slice.call( codeForm.querySelectorAll( '.elvane-login__otp input' ) );
 	var resendButton = codeForm.querySelector( '[data-elvane-resend]' );
@@ -40,7 +42,17 @@
 	var showStep = function ( step ) {
 		phoneForm.hidden = step !== 'phone';
 		codeForm.hidden = step !== 'code';
-		( step === 'phone' ? phoneInput : digits[ 0 ] ).focus();
+		if ( passwordForm ) {
+			passwordForm.hidden = step !== 'password';
+		}
+		var first = {
+			phone: phoneInput.readOnly ? phoneForm.querySelector( '.elvane-login__button' ) : phoneInput,
+			code: digits[ 0 ],
+			password: passwordForm && passwordForm.querySelector( 'input[name="login"]' ),
+		}[ step ];
+		if ( first ) {
+			first.focus();
+		}
 	};
 
 	var getVerifier = function () {
@@ -97,6 +109,9 @@
 
 	// Readable message for a Firebase or server error.
 	var messageFor = function ( error, fallback ) {
+		if ( error && error.serverMessage ) {
+			return error.serverMessage;
+		}
 		switch ( error && error.code ) {
 			case 'auth/invalid-verification-code':
 				return t.wrongCode;
@@ -186,6 +201,7 @@
 				if ( ! json || ! json.success ) {
 					var error = new Error( 'server' );
 					error.code = 'elvane/server';
+					error.serverMessage = json && json.data && json.data.message;
 					throw error;
 				}
 				setBusy( codeForm, true, t.success );
@@ -239,6 +255,9 @@
 	var open = function ( target ) {
 		returnTo = target || '';
 		lastFocus = document.activeElement;
+		if ( forgotNote ) {
+			forgotNote.hidden = true;
+		}
 		root.hidden = false;
 		document.documentElement.classList.add( 'elvane-login-open' );
 		showStep( 'phone' );
@@ -311,6 +330,87 @@
 			if ( pasted.length === 6 ) {
 				verifyCode();
 			}
+		} );
+	} );
+
+	/* Password login */
+
+	var loginWithPassword = function () {
+		var form = passwordForm;
+		var login = form.querySelector( 'input[name="login"]' ).value.trim();
+		var password = form.querySelector( 'input[name="password"]' ).value;
+		setError( form, '' );
+		if ( ! login || ! password ) {
+			setError( form, t.missing );
+			return;
+		}
+		setBusy( form, true, t.signingIn );
+		var body = new URLSearchParams();
+		body.append( 'action', 'elvane_password_login' );
+		body.append( 'login', login );
+		body.append( 'password', password );
+		body.append( 'redirect_to', returnTo );
+		fetch( settings.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: body } )
+			.then( function ( response ) {
+				return response.json().catch( function () {
+					return null;
+				} );
+			} )
+			.then( function ( json ) {
+				if ( ! json || ! json.success ) {
+					setError( form, ( json && json.data && json.data.message ) || t.loginFailed );
+					setBusy( form, false, t.login );
+					return;
+				}
+				setBusy( form, true, t.success );
+				var target = json.data && json.data.redirect;
+				if ( target ) {
+					window.location.assign( target );
+				} else {
+					window.location.reload();
+				}
+			} )
+			.catch( function () {
+				setError( form, t.network );
+				setBusy( form, false, t.login );
+			} );
+	};
+
+	if ( passwordForm ) {
+		passwordForm.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+			loginWithPassword();
+		} );
+
+		passwordForm.querySelector( '[data-elvane-reveal]' ).addEventListener( 'click', function ( event ) {
+			var input = passwordForm.querySelector( 'input[name="password"]' );
+			var show = input.type === 'password';
+			input.type = show ? 'text' : 'password';
+			event.currentTarget.textContent = show ? 'Hide' : 'Show';
+		} );
+
+		// Forgot password: log in with a code, then land on Account details to set a new one.
+		passwordForm.querySelector( '[data-elvane-forgot]' ).addEventListener( 'click', function () {
+			returnTo = settings.editAccountUrl;
+			forgotNote.hidden = false;
+			setError( phoneForm, '' );
+			showStep( 'phone' );
+		} );
+	}
+
+	root.querySelectorAll( '[data-elvane-goto]' ).forEach( function ( button ) {
+		button.addEventListener( 'click', function () {
+			if ( forgotNote ) {
+				forgotNote.hidden = true;
+			}
+			showStep( button.getAttribute( 'data-elvane-goto' ) );
+		} );
+	} );
+
+	// Account details: "verify with a code" before setting a password.
+	document.querySelectorAll( '[data-elvane-reverify]' ).forEach( function ( button ) {
+		button.addEventListener( 'click', function () {
+			open( window.location.href.split( '#' )[ 0 ] );
 		} );
 	} );
 

@@ -233,6 +233,79 @@ html.elvane-login-open #ht-ctc-chat {
 	font-size: 11px;
 }
 
+/* Password login */
+.elvane-login__field {
+	position: relative;
+	display: block;
+	margin: 0 0 10px;
+}
+
+.elvane-login__field input {
+	width: 100%;
+	height: 48px;
+	padding: 0 14px;
+	background: none;
+	border: 1px solid #e3e3e3 !important;
+	border-radius: 0;
+	box-shadow: none !important;
+	color: #111;
+	font: 400 14px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	letter-spacing: 0.02em;
+	outline: none;
+}
+
+.elvane-login__field input:focus {
+	border-color: #111 !important;
+}
+
+.elvane-login__field--password input {
+	padding-right: 64px;
+}
+
+.elvane-login__reveal {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 48px;
+	padding: 0 14px;
+	background: none !important;
+	border: 0;
+	color: #6b6b6b;
+	font: 400 11px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.elvane-login__switch {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 6px 10px;
+	margin: 16px 0 0;
+	color: #6b6b6b;
+	font-size: 11px;
+}
+
+.elvane-login__switch .elvane-login__link {
+	margin: 0;
+	font-size: 11px;
+}
+
+.elvane-login__notice {
+	margin: 0 0 14px;
+	padding: 10px 12px;
+	background: #f4f4f4;
+	color: #111;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.elvane-login__phone input[readonly] {
+	color: #6b6b6b;
+}
+
 @keyframes elvane-login-fade {
 	from { opacity: 0; }
 }

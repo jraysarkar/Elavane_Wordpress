@@ -78,16 +78,29 @@ function elvane_store_page_class( $classes ) {
 add_filter( 'body_class', 'elvane_store_page_class' );
 
 /**
- * No downloadable products are sold, so hide "Downloads" in My account (as on live).
+ * My account menu: no "Downloads" (no downloadable products, as on live) and
+ * no "Dashboard" (it only repeats the menu; My account opens on Orders).
  *
  * @param array $items Account menu items.
  * @return array
  */
 function elvane_account_menu_items( $items ) {
-	unset( $items['downloads'] );
+	unset( $items['downloads'], $items['dashboard'] );
 	return $items;
 }
 add_filter( 'woocommerce_account_menu_items', 'elvane_account_menu_items', 999 );
+
+/**
+ * Send the bare My account page (the dashboard) to Orders, e.g. after login.
+ */
+function elvane_account_skip_dashboard() {
+	if ( ! is_user_logged_in() || ! function_exists( 'is_account_page' ) || ! is_account_page() || is_wc_endpoint_url() ) {
+		return;
+	}
+	wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+	exit;
+}
+add_action( 'template_redirect', 'elvane_account_skip_dashboard' );
 
 /**
  * Portrait 3:4 product grid images (the parent theme registers 360×360 squares).

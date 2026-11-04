@@ -1328,3 +1328,79 @@
 		margin: 0 !important;
 	}
 }
+
+/* ---------- Razorpay pay-for-order page (after its payment window is closed) ---------- */
+
+.woocommerce-order-pay .woocommerce > ul.order_details ~ p,
+.woocommerce-order-pay .woocommerce > p {
+	max-width: 520px;
+}
+
+.woocommerce-order-pay #btn-razorpay,
+.woocommerce-order-pay .elvane-razorpay-cancel {
+	display: flex !important;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	max-width: 360px;
+	min-height: 48px;
+	margin: 0 0 12px;
+	padding: 0 24px !important;
+	border-radius: 0;
+	font: 500 12px/1 var(--elvane-font) !important;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.woocommerce-order-pay #btn-razorpay {
+	background: var(--elvane-black) !important;
+	border: 1px solid var(--elvane-black) !important;
+	color: var(--elvane-white) !important;
+}
+
+.woocommerce-order-pay #btn-razorpay:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.woocommerce-order-pay .elvane-razorpay-cancel {
+	background: transparent !important;
+	border: 1px solid var(--elvane-line) !important;
+	color: var(--elvane-black) !important;
+}
+
+.woocommerce-order-pay .elvane-razorpay-cancel:hover {
+	border-color: var(--elvane-black) !important;
+}
+
+.woocommerce-order-pay #msg-razorpay-success {
+	max-width: 520px;
+	padding: 14px 16px !important;
+	background: var(--elvane-grey-bg) !important;
+	border: 0 !important;
+	border-left: 2px solid var(--elvane-black) !important;
+	color: var(--elvane-black);
+	font-size: 13px;
+}
+
+/* Checkout: payment not completed */
+.elvane-store-page .elvane-payment-failed {
+	/* Same column as the checkout block: 1200px wide with 24px padding, centred. */
+	margin: 0 max(var(--elvane-gutter), calc((100% - 1200px) / 2 + 24px)) 28px;
+	padding: 14px 16px;
+	background: #fbf1f0;
+	border-left: 2px solid #b3261e;
+	color: var(--elvane-black);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.elvane-store-page .elvane-payment-failed strong {
+	display: block;
+	margin-bottom: 2px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	font-size: 12px;
+}

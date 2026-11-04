@@ -274,3 +274,101 @@ function elvane_thankyou_message( $message, $order ) {
 		: esc_html__( 'Thank you! Your order is confirmed. We will send you updates when it is packed and dispatched.', 'elvane-store' );
 }
 add_filter( 'woocommerce_thankyou_order_received_text', 'elvane_thankyou_message', 10, 2 );
+
+/* ---------- Razorpay: pay-for-order page and failed payments ---------- */
+
+/**
+ * Razorpay's pay page (shown when its payment window is closed) says only
+ * "click the button below"; say what happened and what to do instead.
+ *
+ * @param string $translated Translated text.
+ * @param string $text       Original text.
+ * @param string $domain     Text domain.
+ * @return string
+ */
+function elvane_razorpay_pay_text( $translated, $text, $domain ) {
+	if ( 'razorpay' === $domain && 'Thank you for your order, please click the button below to pay with Razorpay.' === $text ) {
+		return __( 'Your payment is not complete yet. Your order is saved — pay now to confirm it, or go back and choose another payment method.', 'elvane-store' );
+	}
+	return $translated;
+}
+add_filter( 'gettext', 'elvane_razorpay_pay_text', 20, 3 );
+
+/**
+ * Button labels on Razorpay's pay page (its form has no hooks for them).
+ */
+function elvane_razorpay_pay_assets() {
+	if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-pay' ) ) {
+		return;
+	}
+	$order = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+	wp_enqueue_script(
+		'elvane-razorpay-pay',
+		ELVANE_STORE_URL . 'assets/razorpay-pay.js',
+		array(),
+		elvane_store_asset_version( 'assets/razorpay-pay.js' ),
+		true
+	);
+	wp_localize_script(
+		'elvane-razorpay-pay',
+		'elvaneRazorpayPay',
+		array(
+			/* translators: %s: order total */
+			'pay'    => $order ? sprintf( __( 'Pay %s', 'elvane-store' ), html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total() ) ) ) ) : __( 'Pay now', 'elvane-store' ),
+			'cancel' => __( 'Choose another payment method', 'elvane-store' ),
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', 'elvane_razorpay_pay_assets' );
+
+/**
+ * Remember a failed or cancelled online payment for this visitor, so the
+ * checkout they are sent back to can say so (the block checkout does not show
+ * the plugin's own notice).
+ *
+ * @param int      $order_id Order id.
+ * @param WC_Order $order    Order.
+ */
+function elvane_note_failed_payment( $order_id, $order ) {
+	if ( 'razorpay' !== $order->get_payment_method() || ! function_exists( 'WC' ) || ! WC()->session ) {
+		return;
+	}
+	WC()->session->set( 'elvane_payment_failed', $order->get_order_number() );
+}
+add_action( 'woocommerce_order_status_failed', 'elvane_note_failed_payment', 10, 2 );
+
+/**
+ * Back on checkout after a failed payment: drop Razorpay's own error toast
+ * ("Customer cancelled the payment" and similar), our message replaces it.
+ */
+function elvane_replace_razorpay_failure_notice() {
+	if ( ! is_checkout() || is_wc_endpoint_url() || ! WC()->session || ! WC()->session->get( 'elvane_payment_failed' ) ) {
+		return;
+	}
+	$notices = WC()->session->get( 'wc_notices', array() );
+	unset( $notices['error'] );
+	WC()->session->set( 'wc_notices', $notices );
+}
+add_action( 'template_redirect', 'elvane_replace_razorpay_failure_notice', 1 );
+
+/**
+ * Checkout: one clear message after a failed payment (shown once).
+ *
+ * @param string $content Rendered checkout block.
+ * @return string
+ */
+function elvane_failed_payment_notice( $content ) {
+	if ( ! function_exists( 'WC' ) || ! WC()->session || ! WC()->session->get( 'elvane_payment_failed' ) ) {
+		return $content;
+	}
+	WC()->session->set( 'elvane_payment_failed', null );
+	$notice = sprintf(
+		'<div class="elvane-payment-failed" role="alert"><strong>%1$s</strong> %2$s</div>',
+		esc_html__( 'Payment not completed.', 'elvane-store' ),
+		esc_html__( 'Your bag is saved — please try again or choose another payment method. If any amount was deducted, it will be refunded automatically.', 'elvane-store' )
+	);
+	// Inside the block's own wrapper, so it lines up with the form.
+	$open = strpos( $content, '>' );
+	return false === $open ? $notice . $content : substr_replace( $content, '>' . $notice, $open, 1 );
+}
+add_filter( 'render_block_woocommerce/checkout', 'elvane_failed_payment_notice' );

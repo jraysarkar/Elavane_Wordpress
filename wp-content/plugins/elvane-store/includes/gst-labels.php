@@ -12,6 +12,11 @@
  * The plugin's own breakdown and invoices read those keys, so the keys are
  * left alone; this rebuilds the order's tax lines from them.
  *
+ * It also rounds CGST and SGST separately from the same raw amount, so
+ * ₹123.714 of GST becomes 61.86 + 61.86 = ₹123.72 and the order total ends up
+ * a paisa off what the customer saw (₹2,698.01 instead of ₹2,698.00). Each
+ * line's SGST is therefore set to (GST rounded once) − CGST.
+ *
  * @package ElvaneStore
  */
 
@@ -37,6 +42,73 @@ function elvane_gst_rate( $order ) {
 	}
 	$settings = (array) get_option( 'marginminds_gst_settings', array() );
 	return isset( $settings['default_gst_rate'] ) ? (float) $settings['default_gst_rate'] : 0.0;
+}
+
+/**
+ * Make each line's CGST + SGST equal its GST rounded once (SGST takes the
+ * odd paisa). Does not save the order.
+ *
+ * @param WC_Order $order Order.
+ * @return bool Whether any line changed.
+ */
+function elvane_balance_gst_halves( $order ) {
+	$changed = false;
+
+	foreach ( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) as $item ) {
+		$taxes = $item->get_taxes();
+		$bases = array( 'total' => (float) $item->get_total() );
+		if ( 'line_item' === $item->get_type() ) {
+			$bases['subtotal'] = (float) $item->get_subtotal();
+		}
+
+		foreach ( $bases as $field => $net ) {
+			$cgst = (float) ( $taxes[ $field ]['gstmarginminds_cgst'] ?? 0 );
+			$sgst = (float) ( $taxes[ $field ]['gstmarginminds_sgst'] ?? 0 );
+			if ( $net <= 0 || $cgst <= 0 || $sgst <= 0 ) {
+				continue;
+			}
+			// The line's rate, to the nearest 0.5% (5, 12, 18…), from its own amounts.
+			$rate   = round( ( $cgst + $sgst ) / $net * 200 ) / 2;
+			$target = round( $net * $rate / 100, 2 );
+			$new    = round( $target - $cgst, 2 );
+			// Only ever a rounding fix: never move SGST by more than a paisa.
+			if ( abs( $new - $sgst ) > 0.001 && abs( $new - $sgst ) <= 0.011 ) {
+				$taxes[ $field ]['gstmarginminds_sgst'] = wc_format_decimal( $new, 2 );
+				$changed                                = true;
+			}
+		}
+		$item->set_taxes( $taxes );
+	}
+
+	if ( $changed ) {
+		elvane_refresh_order_tax_totals( $order );
+	}
+	return $changed;
+}
+
+/**
+ * Order tax and grand total from its lines (as WooCommerce sums them),
+ * without recalculating taxes. Does not save the order.
+ *
+ * @param WC_Order $order Order.
+ */
+function elvane_refresh_order_tax_totals( $order ) {
+	$cart_tax = 0.0;
+	$ship_tax = 0.0;
+	$net      = 0.0;
+	foreach ( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) as $item ) {
+		$taxes = $item->get_taxes();
+		$sum   = array_sum( array_map( 'floatval', (array) ( $taxes['total'] ?? array() ) ) );
+		if ( 'shipping' === $item->get_type() ) {
+			$ship_tax += $sum;
+		} else {
+			$cart_tax += $sum;
+			$net      += (float) $item->get_total();
+		}
+	}
+	$order->set_cart_tax( wc_round_tax_total( $cart_tax ) );
+	$order->set_shipping_tax( wc_round_tax_total( $ship_tax ) );
+	$order->set_total( round( $net + (float) $order->get_shipping_total() + (float) $order->get_cart_tax() + (float) $order->get_shipping_tax(), wc_get_price_decimals() ) );
 }
 
 /**
@@ -103,7 +175,11 @@ function elvane_rebuild_gst_tax_lines( $order ) {
  */
 function elvane_gst_lines_on_new_order( $order ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
-	if ( $order && elvane_rebuild_gst_tax_lines( $order ) ) {
+	if ( ! $order ) {
+		return;
+	}
+	$balanced = elvane_balance_gst_halves( $order );
+	if ( elvane_rebuild_gst_tax_lines( $order ) || $balanced ) {
 		$order->save();
 	}
 }
@@ -155,6 +231,7 @@ add_action( 'woocommerce_order_after_calculate_totals', 'elvane_gst_restore_addr
  */
 function elvane_gst_lines_after_recalculate( $and_taxes, $order ) {
 	if ( $and_taxes && $order instanceof WC_Order ) {
+		elvane_balance_gst_halves( $order );
 		elvane_rebuild_gst_tax_lines( $order );
 	}
 }

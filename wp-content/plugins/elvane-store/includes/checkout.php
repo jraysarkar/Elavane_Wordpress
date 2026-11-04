@@ -273,7 +273,8 @@ function elvane_thankyou_message( $message, $order ) {
 		? sprintf( esc_html__( 'Thank you, %s! Your order is confirmed. We will send you updates when it is packed and dispatched.', 'elvane-store' ), esc_html( $name ) )
 		: esc_html__( 'Thank you! Your order is confirmed. We will send you updates when it is packed and dispatched.', 'elvane-store' );
 }
-add_filter( 'woocommerce_thankyou_order_received_text', 'elvane_thankyou_message', 10, 2 );
+// After Razorpay (20), which puts "Your account has been charged…" on every order, COD included.
+add_filter( 'woocommerce_thankyou_order_received_text', 'elvane_thankyou_message', 30, 2 );
 
 /* ---------- Razorpay: pay-for-order page and failed payments ---------- */
 

@@ -276,6 +276,18 @@ function elvane_thankyou_message( $message, $order ) {
 // After Razorpay (20), which puts "Your account has been charged…" on every order, COD included.
 add_filter( 'woocommerce_thankyou_order_received_text', 'elvane_thankyou_message', 30, 2 );
 
+/**
+ * Order-complete page: no "Pay with cash upon delivery." line (the payment
+ * method is already in the summary above it). Emails keep it.
+ */
+function elvane_thankyou_hide_cod_note() {
+	$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+	if ( isset( $gateways['cod'] ) ) {
+		remove_action( 'woocommerce_thankyou_cod', array( $gateways['cod'], 'thankyou_page' ) );
+	}
+}
+add_action( 'woocommerce_thankyou_cod', 'elvane_thankyou_hide_cod_note', 1 );
+
 /* ---------- Razorpay: pay-for-order page and failed payments ---------- */
 
 /**

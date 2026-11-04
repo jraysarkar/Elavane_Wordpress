@@ -1404,3 +1404,10 @@
 	text-transform: uppercase;
 	font-size: 12px;
 }
+
+/* Order complete: the items and totals are on the invoice, so show only the
+   summary, the invoice button and the addresses. */
+.woocommerce-order-received .woocommerce-order-details__title,
+.woocommerce-order-received .woocommerce-table--order-details {
+	display: none;
+}

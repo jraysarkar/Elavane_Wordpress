@@ -1054,6 +1054,7 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
    bottom is in view; all of the description stays readable. */
 .single-product div.product > .summary {
 	position: sticky;
+	box-sizing: border-box;
 	top: var(--elvane-summary-top, calc(var(--elvane-announce-h) + var(--elvane-header-h)));
 	grid-column: 2;
 	width: 100% !important;

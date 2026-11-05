@@ -41,6 +41,13 @@ function elvane_enqueue_assets() {
 		);
 	}
 
+	wp_enqueue_style(
+		'elvane-motion',
+		$uri . '/assets/css/elvane-motion.css',
+		array( 'elvane-child' ),
+		(string) filemtime( $dir . '/assets/css/elvane-motion.css' )
+	);
+
 	wp_enqueue_script(
 		'elvane-child',
 		$uri . '/assets/js/elvane.js',
@@ -48,8 +55,25 @@ function elvane_enqueue_assets() {
 		(string) filemtime( $dir . '/assets/js/elvane.js' ),
 		array( 'strategy' => 'defer', 'in_footer' => true )
 	);
+
+	wp_enqueue_script(
+		'elvane-motion',
+		$uri . '/assets/js/elvane-motion.js',
+		array(),
+		(string) filemtime( $dir . '/assets/js/elvane-motion.js' ),
+		array( 'strategy' => 'defer', 'in_footer' => true )
+	);
 }
 add_action( 'wp_enqueue_scripts', 'elvane_enqueue_assets', 20 );
+
+/**
+ * Turn the motion layer on before the first paint (so the intro does not
+ * flicker), unless the visitor has asked their device for reduced motion.
+ */
+function elvane_motion_flag() {
+	echo "<script>if(!window.matchMedia||!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('elvane-motion')}</script>\n";
+}
+add_action( 'wp_head', 'elvane_motion_flag', 1 );
 
 /**
  * Cart, checkout, account, wishlist and order-tracking pages share one stylesheet.

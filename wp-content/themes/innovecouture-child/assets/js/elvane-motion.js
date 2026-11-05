@@ -154,51 +154,6 @@
 		}
 	}
 
-	// Cursor label over photos (mouse and trackpad only).
-	if ( window.matchMedia( '(hover: hover) and (pointer: fine)' ).matches ) {
-		var cursor = document.createElement( 'div' );
-		cursor.className = 'elvane-cursor';
-		cursor.setAttribute( 'aria-hidden', 'true' );
-		document.body.appendChild( cursor );
-		var targets = '.elvane-hero__img, .elvane-tile__img, ul.products li.product .vamtam-thumb-wrapper';
-		var x = -200;
-		var y = -200;
-		var cx = x;
-		var cy = y;
-		var following = false;
-		var follow = function () {
-			cx += ( x - cx ) * 0.2;
-			cy += ( y - cy ) * 0.2;
-			cursor.style.setProperty( '--x', cx.toFixed( 1 ) + 'px' );
-			cursor.style.setProperty( '--y', cy.toFixed( 1 ) + 'px' );
-			if ( Math.abs( x - cx ) > 0.5 || Math.abs( y - cy ) > 0.5 ) {
-				window.requestAnimationFrame( follow );
-			} else {
-				following = false;
-			}
-		};
-		document.addEventListener( 'mousemove', function ( e ) {
-			x = e.clientX;
-			y = e.clientY;
-			var over = e.target.closest ? e.target.closest( targets ) : null;
-			// Swiper arrows inside product photos keep the normal pointer.
-			if ( over && e.target.closest( '.swiper-button-prev, .swiper-button-next' ) ) {
-				over = null;
-			}
-			if ( over ) {
-				cursor.textContent = over.closest( 'li.product' ) ? 'View' : 'Shop';
-			}
-			cursor.classList.toggle( 'is-on', !! over );
-			if ( ! following ) {
-				following = true;
-				window.requestAnimationFrame( follow );
-			}
-		}, { passive: true } );
-		document.addEventListener( 'mouseleave', function () {
-			cursor.classList.remove( 'is-on' );
-		} );
-	}
-
 	// Order complete: a tick above the thank-you line.
 	var thanks = document.querySelector( '.woocommerce-order-received .woocommerce-thankyou-order-received' );
 	if ( thanks ) {

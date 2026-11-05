@@ -810,10 +810,9 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 .elvane-products ul.products {
 	display: grid !important;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
-	gap: 0 !important;
+	gap: 40px 16px !important;
 	margin: 0 !important;
-	padding: 0 !important;
-	border-top: 1px solid var(--elvane-line);
+	padding: 0 var(--elvane-gutter) !important;
 }
 
 .woocommerce ul.products::before,
@@ -826,20 +825,15 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	float: none !important;
 	width: auto !important;
 	margin: 0 !important;
-	padding: 0 0 18px !important;
-	border-right: 1px solid var(--elvane-line);
-	border-bottom: 1px solid var(--elvane-line);
+	padding: 0 !important;
 	background: var(--elvane-white);
 	text-align: left;
 }
 
-.woocommerce ul.products li.product:nth-child(4n) {
-	border-right: 0;
-}
-
 .woocommerce ul.products li.product .vamtam-thumb-wrapper {
 	position: relative;
-	aspect-ratio: 3 / 4;
+	/* 2:3, the shape of the model photos, so heads and shoes both show */
+	aspect-ratio: 2 / 3;
 	margin: 0 0 12px;
 	overflow: hidden;
 	background: var(--elvane-grey-bg);
@@ -1047,6 +1041,12 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	display: block;
 	width: 100%;
 	height: auto;
+}
+
+/* Hover zoom (Smart Variations Images "inner" lens): no grey frame */
+.single-product .zoomWindow {
+	border: 0 !important;
+	cursor: zoom-in !important;
 }
 
 /* Sticky details column. When it is taller than the screen, elvane.js sets a
@@ -1610,14 +1610,8 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	.woocommerce ul.products,
 	.elvane-products ul.products {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	.woocommerce ul.products li.product:nth-child(4n) {
-		border-right: 1px solid var(--elvane-line);
-	}
-
-	.woocommerce ul.products li.product:nth-child(2n) {
-		border-right: 0;
+		gap: 28px 8px !important;
+		padding: 0 8px !important;
 	}
 
 	.woocommerce ul.products li.product .swiper-button-prev,

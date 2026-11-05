@@ -1,6 +1,5 @@
 /*
- * Elvane motion layer: page intro, headline reveals, marquees, cursor label,
- * hover details. Everything is scoped to html.elvane-motion, which a tiny
+ * Elvane motion layer: page intro, headline reveals, marquees, hover details. Everything is scoped to html.elvane-motion, which a tiny
  * script in <head> sets only when the visitor has not asked for reduced motion.
  */
 
@@ -208,34 +207,6 @@
 .elvane-motion :is(.button, .single_add_to_cart_button, .wc-block-components-button, .checkout-button):not(:disabled):hover {
 	transform: translate3d(0, -2px, 0);
 	letter-spacing: 0.1em;
-}
-
-/* ---------- Cursor label over photos (mouse only) ---------- */
-
-.elvane-cursor {
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: 99999;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 88px;
-	height: 88px;
-	margin: -44px 0 0 -44px;
-	border-radius: 50%;
-	background: var(--elvane-black);
-	color: var(--elvane-white);
-	font: 500 11px/1 var(--elvane-font);
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	pointer-events: none;
-	transform: translate3d(var(--x, -200px), var(--y, -200px), 0) scale(0);
-	transition: transform 0.35s var(--elvane-ease);
-}
-
-.elvane-cursor.is-on {
-	transform: translate3d(var(--x), var(--y), 0) scale(1);
 }
 
 /* ---------- Order complete: a tick draws itself ---------- */

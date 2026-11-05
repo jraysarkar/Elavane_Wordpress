@@ -127,13 +127,13 @@ function elvane_account_skip_dashboard() {
 add_action( 'template_redirect', 'elvane_account_skip_dashboard' );
 
 /**
- * Portrait 3:4 product grid images (the parent theme registers 360×360 squares).
+ * Portrait 2:3 product grid images, the shape of the model photos (the parent theme registers 360×360 squares).
  * After changing this, regenerate thumbnails: wp media regenerate --image_size=woocommerce_thumbnail
  */
 function elvane_thumbnail_size() {
 	return array(
 		'width'  => 600,
-		'height' => 800,
+		'height' => 900,
 		'crop'   => 1,
 	);
 }

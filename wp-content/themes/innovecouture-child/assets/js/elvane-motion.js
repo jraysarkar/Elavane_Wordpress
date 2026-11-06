@@ -47,8 +47,8 @@
 	};
 
 	var headlines = document.querySelectorAll(
-		'.elvane-display .elementor-heading-title, .elvane-tile__eyebrow .elementor-heading-title, ' +
-		'.elvane-section__title .elementor-heading-title, .single-product .product_title'
+		'.elvane-home :is(.elvane-display, .elvane-tile__eyebrow, .elvane-section__title), ' +
+		'.elvane-category-banner__title, .single-product .product_title'
 	);
 	var showHeadline = function ( el ) {
 		window.requestAnimationFrame( function () {

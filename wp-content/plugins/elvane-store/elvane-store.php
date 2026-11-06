@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Elvane Store
- * Description: Elvane Clothing store logic, independent of the theme: phone OTP login (Firebase, verified server-side), required login for account/checkout/wishlist, COD delivery charge, Buy Now, WELCOME200 rule and order-page touches.
+ * Description: Elvane Clothing store logic, independent of the theme: phone OTP login (Firebase, verified server-side), required login for account/checkout/wishlist, COD delivery charge, Buy Now, WELCOME200 rule, admin-managed home and category banners, and order-page touches.
  * Version:     1.0.0
  * Author:      Elvane Clothing
  * Requires Plugins: woocommerce
@@ -23,6 +23,7 @@ require_once ELVANE_STORE_DIR . 'includes/account.php';
 require_once ELVANE_STORE_DIR . 'includes/gst-labels.php';
 require_once ELVANE_STORE_DIR . 'includes/shipment.php';
 require_once ELVANE_STORE_DIR . 'includes/shipment-sync.php';
+require_once ELVANE_STORE_DIR . 'includes/banners.php';
 
 /**
  * Asset version: file modification time, so every deploy busts caches.

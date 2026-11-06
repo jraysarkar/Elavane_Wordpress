@@ -5,7 +5,8 @@ Layouts are built only from Elementor / Elementor Pro core widgets plus
 shortcodes of active plugins, so they do not depend on the old Mixtas
 (Kitify / Royal addons) widgets. Styling lives in the child theme CSS
 (class names below), so the design is versioned in git. Images are
-referenced by media-library attachment ID (see IMAGES).
+referenced by media-library attachment ID (see IMAGES); the home banners
+are edited in the admin instead (elvane-store plugin, Banners menu).
 
 Usage:  python3 build_templates.py <out-dir> <site-url>
 Writes: header.json, footer.json, home.json
@@ -23,11 +24,6 @@ FACEBOOK = "https://www.facebook.com/share/1HsqCH4Cnt/"
 # Media-library attachment IDs on the site (Elvane's own photography).
 IMAGES = {
 	"logo": (2986, "2026/10/elvane-logo-black.png"),  # source: ops/brand/
-	"hero_left": (2797, "2026/06/3.2.png"),
-	"hero_right": (2765, "2026/06/1.2.png"),
-	"trousers": (2489, "2026/05/WhatsApp-Image-2026-05-24-at-5.02.22-PM.jpeg"),
-	"cargo": (2430, "2026/05/baggy3.png"),
-	"polo": (2400, "2026/05/1.png"),
 }
 
 SITE = ""
@@ -74,18 +70,6 @@ def links_row(seed, items, css_class):
 	return widget(seed, "icon-list", css_class, view="inline", icon_list=[
 		{"_id": _id(seed + text), "text": text, "link": link(url, url.startswith("http")), "selected_icon": icon()}
 		for text, url in items
-	])
-
-
-def media_tile(seed, image_key, eyebrow, cta, url, css_class="elvane-tile"):
-	"""Full-bleed photo with a centred caption, like the reference's collection tiles."""
-	return container(seed, css_class, [
-		widget(seed + "-img", "image", "elvane-tile__img", image=image(image_key), image_size="full",
-			link_to="custom", link=link(url)),
-		container(seed + "-cap", "elvane-tile__caption", [
-			text_link(seed + "-eyebrow", eyebrow, url, "elvane-tile__eyebrow"),
-			text_link(seed + "-cta", cta, url, "elvane-tile__cta"),
-		]),
 	])
 
 
@@ -144,36 +128,12 @@ def build_footer():
 
 
 def build_home():
+	# Banners and New arrivals come from the elvane-store plugin: banners are
+	# edited in the admin (Banners menu), so this page only holds the shortcode.
+	# One block, so the full-screen banners stay pinned while the next slides over.
 	return [
-		# Hero: two portraits side by side with the brand line over them.
-		# Sections marked elvane-stack stay pinned while the next one slides over them.
-		container("home-hero", "elvane-hero elvane-stack", [
-			widget("home-hero-l", "image", "elvane-hero__img", image=image("hero_left"), image_size="full",
-				link_to="custom", link=link("/shop/")),
-			widget("home-hero-r", "image", "elvane-hero__img", image=image("hero_right"), image_size="full",
-				link_to="custom", link=link("/shop/")),
-			container("home-hero-cap", "elvane-hero__caption", [
-				widget("home-hero-title", "heading", "elvane-display", title="Less noise.<br>More style.",
-					header_size="h1"),
-				text_link("home-hero-cta", "Shop now", "/shop/", "elvane-tile__cta"),
-			]),
-		]),
-		media_tile("home-trousers", "trousers", "Trousers", "Shop collection", "/product-category/trousers/",
-			"elvane-tile elvane-stack"),
-		container("home-split", "elvane-split elvane-stack", [
-			media_tile("home-cargo", "cargo", "Cargo", "Shop now", "/product-category/trousers/cargo/",
-				"elvane-tile elvane-tile--half"),
-			media_tile("home-polo", "polo", "Polos", "Shop now", "/product-category/t-shirt/polo/",
-				"elvane-tile elvane-tile--half"),
-		]),
-		container("home-new", "elvane-section", [
-			container("home-new-head", "elvane-section__head", [
-				widget("home-new-title", "heading", "elvane-section__title", title="New arrivals", header_size="h2"),
-				text_link("home-new-all", "View all", "/shop/", "elvane-textlink"),
-			]),
-			widget("home-new-grid", "woocommerce-products", "elvane-products",
-				columns="4", rows="2", query_post_type="product", query_orderby="date", query_order="desc",
-				paginate=""),
+		container("home", "elvane-home-page", [
+			widget("home-banners", "shortcode", shortcode="[elvane_home]"),
 		]),
 	]
 

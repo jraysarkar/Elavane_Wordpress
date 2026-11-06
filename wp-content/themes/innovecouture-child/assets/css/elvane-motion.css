@@ -81,7 +81,8 @@
 /* ---------- Headlines: words rise out of a mask ---------- */
 
 /* Hidden until elvane-motion.js splits them (shown anyway after 2s as a fail-safe). */
-.elvane-motion :is(.elvane-display, .elvane-tile__eyebrow, .elvane-section__title) .elementor-heading-title:not(.elvane-split),
+.elvane-motion .elvane-home :is(.elvane-display, .elvane-tile__eyebrow, .elvane-section__title):not(.elvane-split),
+.elvane-motion .elvane-category-banner__title:not(.elvane-split),
 .elvane-motion .single-product .product_title:not(.elvane-split) {
 	opacity: 0;
 	animation: elvane-show 0s 2s forwards;
@@ -106,7 +107,7 @@
 	transform: none;
 }
 
-.elvane-display .elvane-split {
+.elvane-display.elvane-split {
 	--elvane-delay: 450ms;
 }
 

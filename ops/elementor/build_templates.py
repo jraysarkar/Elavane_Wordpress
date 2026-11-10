@@ -102,15 +102,8 @@ def build_header():
 
 def build_footer():
 	return [
+		# As on the live site: only the social links and the two policy pages.
 		container("ftr", "elvane-footer", [
-			links_row("ftr-nav", [
-				("Home", "/"),
-				("Shop", "/shop/"),
-				("About", "/about-us/"),
-				("Contact", "/contact-us/"),
-				("Track order", "/order-tracking/"),
-				("FAQs", "/faqs/"),
-			], "elvane-footer__nav"),
 			links_row("ftr-social", [
 				("Instagram", INSTAGRAM),
 				("Facebook", FACEBOOK),
@@ -120,7 +113,7 @@ def build_footer():
 					editor="<p>© 2026, Elvane Clothing.</p>"),
 				links_row("ftr-legal", [
 					("Privacy policy", "/privacy-policy/"),
-					("Terms of service", "/terms-of-use/"),
+					("Terms & conditions", "/terms-of-use/"),
 				], "elvane-footer__legal"),
 			]),
 		]),

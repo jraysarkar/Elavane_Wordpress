@@ -191,13 +191,13 @@
 
 /* ---------- Links and buttons ---------- */
 
-.elvane-motion :is(.elvane-nav .elementor-nav-menu--main a.elementor-item, .elvane-textlink a, .elvane-footer__nav a, .elvane-footer__social a) {
+.elvane-motion :is(.elvane-nav .elementor-nav-menu--main a.elementor-item, .elvane-textlink a, .elvane-footer__social a) {
 	background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
 	text-decoration: none;
 	transition: background-size 0.45s var(--elvane-ease);
 }
 
-.elvane-motion :is(.elvane-nav .elementor-nav-menu--main a.elementor-item, .elvane-textlink a, .elvane-footer__nav a, .elvane-footer__social a):hover {
+.elvane-motion :is(.elvane-nav .elementor-nav-menu--main a.elementor-item, .elvane-textlink a, .elvane-footer__social a):hover {
 	background-size: 100% 1px;
 }
 

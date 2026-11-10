@@ -1640,10 +1640,6 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	opacity: 0.55;
 }
 
-.elvane-footer__social .elementor-icon-list-text {
-	color: var(--elvane-grey-text);
-}
-
 .elvane-footer__bottom.e-con {
 	--flex-direction: row;
 	--justify-content: space-between;

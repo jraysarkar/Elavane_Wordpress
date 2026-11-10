@@ -260,7 +260,7 @@ function elvane_customer_order_updates( $order ) {
 
 /* ---------- My account → Orders: tracking column ---------- */
 
-add_filter( 'woocommerce_my_account_my_orders_columns', function ( $columns ) {
+add_filter( 'woocommerce_account_orders_columns', function ( $columns ) {
 	$new = array();
 	foreach ( $columns as $key => $label ) {
 		if ( 'order-actions' === $key ) {

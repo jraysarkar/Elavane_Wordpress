@@ -1744,8 +1744,19 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 		height: 75vh;
 	}
 
-	.elvane-pair {
-		grid-template-columns: 1fr;
+	/* Phones: the two half banners become two full-screen pinned banners
+	   (one pinned block would cut the second one off). */
+	.elvane-pair.elvane-stack {
+		display: contents;
+	}
+
+	.elvane-pair.elvane-stack .elvane-tile--half {
+		position: sticky;
+		top: calc(var(--elvane-announce-h) + var(--elvane-header-h));
+		z-index: 2;
+		height: calc(100svh - var(--elvane-announce-h) - var(--elvane-header-h));
+		min-height: 0;
+		background: var(--elvane-white);
 	}
 
 	.elvane-tile--half {

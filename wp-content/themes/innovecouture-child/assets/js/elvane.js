@@ -90,14 +90,24 @@
 
 	// Home: full-screen sections stack over each other (CSS sticky). While a
 	// section is being covered, its photo drifts up slightly and dims.
-	var stack = Array.prototype.slice.call( document.querySelectorAll( '.elvane-stack' ) );
+	// On phones a pair of half banners has no box of its own (display: contents):
+	// each half is pinned on its own instead.
+	var stack = [];
+	document.querySelectorAll( '.elvane-stack' ).forEach( function ( el ) {
+		if ( getComputedStyle( el ).display === 'contents' ) {
+			stack.push.apply( stack, el.children );
+		} else {
+			stack.push( el );
+		}
+	} );
+	var afterStack = document.querySelector( '.elvane-home > .elvane-section' );
 	if ( ! reduceMotion && stack.length ) {
 		var ticking = false;
 		var update = function () {
 			ticking = false;
 			var vh = window.innerHeight;
 			stack.forEach( function ( section, i ) {
-				var next = stack[ i + 1 ] || section.nextElementSibling;
+				var next = stack[ i + 1 ] || afterStack || section.nextElementSibling;
 				if ( ! next ) {
 					return;
 				}

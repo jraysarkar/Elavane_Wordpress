@@ -859,6 +859,63 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	}
 }
 
+/* ---------- Text pages (Privacy policy, Terms…): readable column ---------- */
+
+.elvane-text-page #sub-header .meta-header,
+.elvane-text-page #sub-header .limit-wrapper,
+.elvane-text-page .vamtam-main .limit-wrapper {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 0 var(--elvane-gutter);
+}
+
+.elvane-text-page #sub-header .meta-header {
+	padding: 56px 0 8px;
+	background: none;
+}
+
+.elvane-text-page #sub-header h1 {
+	margin: 0;
+	color: var(--elvane-black);
+	font: 500 clamp(34px, 5vw, 56px)/1.05 var(--elvane-display);
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+}
+
+.elvane-text-page .page-content {
+	padding: 0 0 72px;
+	color: #333;
+	font: 400 14px/1.75 var(--elvane-font);
+	overflow-wrap: break-word;
+}
+
+.elvane-text-page .page-content p,
+.elvane-text-page .page-content li {
+	margin: 0 0 14px;
+	font: inherit;
+}
+
+.elvane-text-page .page-content :is(h2, h3, h4) {
+	margin: 36px 0 12px;
+	color: var(--elvane-black);
+	font: 600 13px/1.4 var(--elvane-font);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.elvane-text-page .page-content :is(ul, ol) {
+	margin: 0 0 14px;
+	padding-left: 20px;
+}
+
+.elvane-text-page .page-content a {
+	color: var(--elvane-black);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
 /* ---------- Product grid (shop, categories, home) ---------- */
 
 .woocommerce ul.products,

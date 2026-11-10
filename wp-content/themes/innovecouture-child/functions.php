@@ -140,6 +140,22 @@ function elvane_thumbnail_size() {
 add_filter( 'woocommerce_get_image_size_thumbnail', 'elvane_thumbnail_size' );
 
 /**
+ * Plain text pages (Privacy policy, Terms…: block-editor pages, not Elementor
+ * or store pages) get the reading layout in elvane.css.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function elvane_text_page_class( $classes ) {
+	if ( is_page() && ! is_front_page() && ! elvane_is_store_page()
+		&& 'builder' !== get_post_meta( get_queried_object_id(), '_elementor_edit_mode', true ) ) {
+		$classes[] = 'elvane-text-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'elvane_text_page_class' );
+
+/**
  * Lets the CSS treat the home page header as transparent over the hero.
  *
  * @param string[] $classes Body classes.

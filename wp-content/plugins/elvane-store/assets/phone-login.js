@@ -424,16 +424,23 @@
 		}
 	} );
 
-	// Account links open the popup instead of the account page.
+	// Links to the account, wishlist and checkout pages open the popup on the
+	// page the visitor is on (those pages need login), then go there after login.
+	var trim = function ( url ) {
+		return url.split( /[?#]/ )[ 0 ].replace( /\/$/, '' );
+	};
+	var gated = ( settings.loginUrls || [] ).concat( settings.accountUrl ? [ settings.accountUrl ] : [] ).map( trim );
 	document.addEventListener( 'click', function ( event ) {
 		var link = event.target.closest && event.target.closest( 'a[href]' );
 		if ( ! link || link.closest( '#elvane-login' ) ) {
 			return;
 		}
-		var href = link.href.split( /[?#]/ )[ 0 ].replace( /\/$/, '' );
-		if ( settings.accountUrl && href === settings.accountUrl.replace( /\/$/, '' ) ) {
+		var href = trim( link.href );
+		// The wishlist also has per-list addresses (/wishlist/ABC123).
+		var wishlist = settings.wishlistUrl ? trim( settings.wishlistUrl ) : '';
+		if ( gated.indexOf( href ) !== -1 || ( wishlist && href.indexOf( wishlist + '/' ) === 0 ) ) {
 			event.preventDefault();
-			open( settings.accountUrl );
+			open( link.href );
 		}
 	} );
 

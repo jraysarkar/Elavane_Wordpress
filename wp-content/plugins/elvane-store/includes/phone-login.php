@@ -257,6 +257,13 @@ function elvane_phone_login_assets() {
 			'firebase'   => array_intersect_key( $config, array_flip( array( 'apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId' ) ) ),
 			// Logged in, the popup only re-verifies, so account links stay normal links.
 			'accountUrl' => is_user_logged_in() ? '' : wc_get_page_permalink( 'myaccount' ),
+			// Other pages that need login (see elvane_require_login): their links
+			// open the popup in place too, then continue to the page.
+			'loginUrls'   => is_user_logged_in() ? array() : array_values( array_filter( array(
+				wc_get_page_permalink( 'checkout' ),
+				get_permalink( get_page_by_path( 'wishlist' ) ),
+			) ) ),
+			'wishlistUrl' => is_user_logged_in() ? '' : (string) get_permalink( get_page_by_path( 'wishlist' ) ),
 			'editAccountUrl' => wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ),
 			'resendWait' => 30,
 			'i18n'       => array(

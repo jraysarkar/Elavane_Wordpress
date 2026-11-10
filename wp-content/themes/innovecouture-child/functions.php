@@ -154,12 +154,12 @@ function elvane_body_class( $classes ) {
 add_filter( 'body_class', 'elvane_body_class' );
 
 /**
- * Plain "Sale" badge instead of WooCommerce's "Sale!".
+ * No "Sale" badge on product photos (the struck-through price already shows it).
  *
  * @return string
  */
 function elvane_sale_flash() {
-	return '<span class="onsale">' . esc_html__( 'Sale', 'elvane' ) . '</span>';
+	return '';
 }
 add_filter( 'woocommerce_sale_flash', 'elvane_sale_flash' );
 

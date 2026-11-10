@@ -195,6 +195,20 @@ function elvane_no_product_type_description( $description, $post_type ) {
 add_filter( 'get_the_post_type_description', 'elvane_no_product_type_description', 10, 2 );
 
 /**
+ * Product page: no "8 in stock" / "In stock" line; "Out of stock" still shows.
+ * (The admin setting WooCommerce → Products → Inventory → Stock display format
+ * only hides the number.)
+ *
+ * @param string     $html    Stock HTML.
+ * @param WC_Product $product Product or variation.
+ * @return string
+ */
+function elvane_hide_in_stock( $html, $product ) {
+	return $product && $product->is_in_stock() && ! $product->is_on_backorder() ? '' : $html;
+}
+add_filter( 'woocommerce_get_stock_html', 'elvane_hide_in_stock', 10, 2 );
+
+/**
  * "You may also like" instead of "Related products".
  *
  * @return string

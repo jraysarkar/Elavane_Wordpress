@@ -221,6 +221,31 @@ function elvane_welcome200_first_order_only( $valid, $coupon ) {
 }
 add_filter( 'woocommerce_coupon_is_valid', 'elvane_welcome200_first_order_only', 10, 2 );
 
+/* ---------- One coupon per order ---------- */
+
+/**
+ * A coupon is refused while a different one is already in the cart, for every
+ * coupon (no need to tick "Individual use only" on each one).
+ *
+ * @param bool      $valid  Current validity.
+ * @param WC_Coupon $coupon Coupon.
+ * @return bool
+ * @throws Exception When another coupon is already applied.
+ */
+function elvane_one_coupon_per_order( $valid, $coupon ) {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return $valid;
+	}
+	$code   = wc_format_coupon_code( $coupon->get_code() );
+	$others = array_diff( WC()->cart->get_applied_coupons(), array( $code ) );
+	if ( $others ) {
+		/* translators: %s: coupon code already in the cart */
+		throw new Exception( esc_html( sprintf( __( 'Only one coupon can be used per order. Remove %s first to use this one.', 'elvane-store' ), strtoupper( reset( $others ) ) ) ) );
+	}
+	return $valid;
+}
+add_filter( 'woocommerce_coupon_is_valid', 'elvane_one_coupon_per_order', 5, 2 );
+
 /* ---------- Copy the name and email from the order to the customer ---------- */
 
 /**

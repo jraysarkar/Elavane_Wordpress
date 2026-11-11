@@ -851,6 +851,18 @@ body {
 	text-transform: uppercase;
 }
 
+/* Category description under a banner */
+.elvane-category-banner__desc {
+	max-width: 640px;
+	margin: -12px var(--elvane-gutter) 28px;
+	color: var(--elvane-grey-text);
+	font: 400 13px/1.6 var(--elvane-font);
+}
+
+.elvane-category-banner__desc p {
+	margin: 0;
+}
+
 /* The banner carries the name, so the plain title above it goes. */
 .elvane-has-category-banner #sub-header {
 	display: none;
@@ -1498,6 +1510,17 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	text-transform: uppercase;
 }
 
+/* Short description (Products → edit → Product short description) */
+.single-product .summary .woocommerce-product-details__short-description {
+	margin: 0 0 24px;
+	color: #333;
+	font: 400 13px/1.7 var(--elvane-font);
+}
+
+.single-product .summary .woocommerce-product-details__short-description p {
+	margin: 0 0 8px;
+}
+
 /* Quantity + full-width black button */
 .single-product .summary .woocommerce-variation-add-to-cart,
 .single-product .summary form.cart:not(.variations_form) {
@@ -1565,7 +1588,8 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	color: var(--elvane-white) !important;
 }
 
-.single-product .summary .woocommerce-variation-add-to-cart .woosw-btn {
+.single-product .summary .woocommerce-variation-add-to-cart .woosw-btn,
+.single-product .summary form.cart:not(.variations_form) .woosw-btn {
 	order: 3;
 }
 
@@ -1574,8 +1598,14 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	display: none !important;
 }
 
-.single-product .summary .woocommerce-variation-add-to-cart .woosw-btn {
+/* Products with and without colour/size choices (simple products) alike */
+.single-product .summary .woocommerce-variation-add-to-cart .woosw-btn,
+.single-product .summary form.cart:not(.variations_form) .woosw-btn {
 	flex: 1 0 100%;
+	height: auto;
+	margin: 0;
+	border-radius: 0;
+	box-shadow: none;
 	padding: 10px 0 0;
 	background: none;
 	border: 0;

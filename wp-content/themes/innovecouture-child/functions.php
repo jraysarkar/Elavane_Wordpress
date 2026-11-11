@@ -336,6 +336,17 @@ function elvane_move_product_tabs() {
 add_action( 'wp', 'elvane_move_product_tabs' );
 
 /**
+ * Category description (Products → Categories → Description) once: the theme
+ * already prints it under the page title, so WooCommerce's second, unstyled
+ * copy goes. With a category banner the title area is hidden, so the banner
+ * shows it (elvane-store banners.php).
+ */
+function elvane_single_category_description() {
+	remove_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_description', 10 );
+}
+add_action( 'wp', 'elvane_single_category_description' );
+
+/**
  * The theme prints the post type's description under the Shop title, which for
  * products is WooCommerce's built-in "This is where you can browse products in
  * this store." Show nothing there instead.

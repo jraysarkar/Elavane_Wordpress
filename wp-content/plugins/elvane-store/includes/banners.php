@@ -509,10 +509,12 @@ function elvane_category_banner() {
 	if ( ! $image_id ) {
 		return;
 	}
+	$description = term_description();
 	printf(
-		'<div class="elvane-category-banner">%s<h1 class="elvane-category-banner__title">%s</h1></div>',
+		'<div class="elvane-category-banner">%s<h1 class="elvane-category-banner__title">%s</h1></div>%s',
 		wp_get_attachment_image( $image_id, 'full', false, array( 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '100vw' ) ),
-		esc_html( single_term_title( '', false ) )
+		esc_html( single_term_title( '', false ) ),
+		$description ? '<div class="elvane-category-banner__desc">' . wp_kses_post( $description ) . '</div>' : ''
 	);
 }
 add_action( 'woocommerce_archive_description', 'elvane_category_banner', 5 );

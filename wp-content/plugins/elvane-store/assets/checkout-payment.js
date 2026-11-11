@@ -9,21 +9,30 @@
 	}
 
 	var saved = '';
-	var pending = '';
+	var desired = '';
+	var busy = false;
 
-	var refreshCart = function () {
-		if ( window.wp && wp.apiFetch && wp.data ) {
-			wp.apiFetch( { path: '/wc/store/v1/cart', method: 'GET' } ).then( function ( cart ) {
-				wp.data.dispatch( 'wc/store/cart' ).receiveCart( cart );
-			} );
-		}
+	// While the delivery charge is being recalculated: a loader over the
+	// totals and the delivery line, and Place order waits (elvane-store-pages.css).
+	var setLoading = function ( on ) {
+		document.documentElement.classList.toggle( 'elvane-checkout-updating', on );
 	};
 
-	var save = function ( method ) {
-		if ( ! method || method === saved || method === pending ) {
-			return;
+	var refreshCart = function () {
+		if ( ! ( window.wp && wp.apiFetch && wp.data ) ) {
+			return Promise.resolve();
 		}
-		pending = method;
+		return wp.apiFetch( { path: '/wc/store/v1/cart', method: 'GET' } ).then( function ( cart ) {
+			wp.data.dispatch( 'wc/store/cart' ).receiveCart( cart );
+		} );
+	};
+
+	// One request at a time; after each, catch up with the latest choice, so
+	// quick switching never leaves the totals of an earlier method on screen.
+	var send = function () {
+		var method = desired;
+		busy = true;
+		setLoading( true );
 		var body = new URLSearchParams();
 		body.append( 'action', 'elvane_set_checkout_payment' );
 		body.append( 'security', settings.security );
@@ -33,15 +42,37 @@
 				return response.json();
 			} )
 			.then( function ( json ) {
-				if ( json && json.success ) {
-					saved = method;
-					refreshCart();
+				if ( ! json || ! json.success ) {
+					throw new Error( 'not saved' );
 				}
+				saved = method;
+				if ( desired !== saved ) {
+					return 'again';
+				}
+				return refreshCart();
 			} )
-			.catch( function () {} )
-			.then( function () {
-				pending = '';
+			.then( function ( next ) {
+				if ( next === 'again' ) {
+					send();
+					return;
+				}
+				busy = false;
+				setLoading( false );
+			}, function () {
+				desired = saved;
+				busy = false;
+				setLoading( false );
 			} );
+	};
+
+	var save = function ( method ) {
+		if ( ! method || method === desired ) {
+			return;
+		}
+		desired = method;
+		if ( ! busy && desired !== saved ) {
+			send();
+		}
 	};
 
 	// The selected method: from the checkout block's store, else the checked radio.

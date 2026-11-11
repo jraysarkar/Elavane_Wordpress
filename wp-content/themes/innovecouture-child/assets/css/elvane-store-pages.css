@@ -1411,3 +1411,52 @@
 .woocommerce-order-received .woocommerce-table--order-details {
 	display: none;
 }
+
+/* ---------- Checkout: loader while the delivery charge updates after a payment-method change (elvane-store checkout-payment.js) ---------- */
+
+@keyframes elvane-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.elvane-checkout-updating .wc-block-checkout__sidebar,
+.elvane-checkout-updating .wp-block-woocommerce-checkout-shipping-methods-block {
+	position: relative;
+	pointer-events: none;
+}
+
+.elvane-checkout-updating .wc-block-checkout__sidebar::after,
+.elvane-checkout-updating .wp-block-woocommerce-checkout-shipping-methods-block::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	background: rgba(255, 255, 255, 0.65);
+}
+
+.elvane-checkout-updating .wc-block-checkout__sidebar::before,
+.elvane-checkout-updating .wp-block-woocommerce-checkout-shipping-methods-block::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 6;
+	width: 22px;
+	height: 22px;
+	margin: -11px 0 0 -11px;
+	border: 1.5px solid var(--elvane-line);
+	border-top-color: var(--elvane-black);
+	border-radius: 50%;
+	animation: elvane-spin 0.7s linear infinite;
+}
+
+/* The order summary is tall: keep its spinner near the totals people look at */
+.elvane-checkout-updating .wc-block-checkout__sidebar::before {
+	top: 240px;
+}
+
+.elvane-checkout-updating .wc-block-components-checkout-place-order-button {
+	opacity: 0.5;
+	pointer-events: none;
+}

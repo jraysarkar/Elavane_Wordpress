@@ -33,6 +33,15 @@
 		activeTab.parentNode.scrollLeft = activeTab.offsetLeft - activeTab.parentNode.offsetLeft - 16;
 	}
 
+	// Banner videos (Banners / category "Banner video"): no autoplay for visitors
+	// who asked their device to reduce motion; they see the still photo.
+	if ( reduceMotion ) {
+		document.querySelectorAll( 'video.elvane-banner-video' ).forEach( function ( video ) {
+			video.removeAttribute( 'autoplay' );
+			video.pause();
+		} );
+	}
+
 	// Fade images in once they have loaded (tiles, hero, product grid).
 	document.querySelectorAll( '.elvane-hero img, .elvane-tile img, ul.products li.product img' ).forEach( function ( img ) {
 		var done = function () {

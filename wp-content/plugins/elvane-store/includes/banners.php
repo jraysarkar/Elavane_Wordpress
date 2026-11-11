@@ -8,8 +8,9 @@
  * page in their "Order"; drafts are hidden. The home page itself only holds
  * the [elvane_home] shortcode.
  *
- * Category pages: Products → Categories → edit → "Banner image" shows a
- * full-width photo with the category name at the top of that category's page.
+ * Category pages: Products → Categories → edit → "Banner image" (and an
+ * optional "Banner video") shows a full-width banner with the category name at
+ * the top of that category's page. Home banners can have a video too.
  *
  * @package ElvaneStore
  */
@@ -74,7 +75,7 @@ add_filter( 'enter_title_here', 'elvane_banner_title_placeholder', 10, 2 );
  * Banner settings saved on the post.
  *
  * @param int $post_id Banner ID.
- * @return array { layout, link_type, link_term, link_url, button, image2 }
+ * @return array { layout, link_type, link_term, link_url, button, image2, video }
  */
 function elvane_banner_settings( $post_id ) {
 	$get = function ( $key, $default = '' ) use ( $post_id ) {
@@ -88,6 +89,7 @@ function elvane_banner_settings( $post_id ) {
 		'link_url'  => $get( 'link_url' ),
 		'button'    => $get( 'button', __( 'Shop now', 'elvane-store' ) ),
 		'image2'    => (int) $get( 'image2', 0 ),
+		'video'     => (int) $get( 'video', 0 ),
 	);
 }
 
@@ -181,6 +183,13 @@ function elvane_banner_meta_box_html( $post ) {
 			<th><label for="elvane-banner-button"><?php esc_html_e( 'Button text', 'elvane-store' ); ?></label></th>
 			<td><input type="text" id="elvane-banner-button" name="elvane_banner[button]" value="<?php echo esc_attr( $s['button'] ); ?>"></td>
 		</tr>
+		<tr>
+			<th><?php esc_html_e( 'Banner video (optional)', 'elvane-store' ); ?></th>
+			<td>
+				<?php elvane_banner_image_field( 'elvane_banner[video]', $s['video'], 'video' ); ?>
+				<p class="description"><?php esc_html_e( 'A short MP4 that plays silently on a loop in place of the banner photo (the photo shows while it loads). Keep it short and light: about 5–15 seconds, under 5 MB.', 'elvane-store' ); ?></p>
+			</td>
+		</tr>
 		<tr class="elvane-banner-image2">
 			<th><?php esc_html_e( 'Second photo (hero only)', 'elvane-store' ); ?></th>
 			<td>
@@ -198,13 +207,21 @@ function elvane_banner_meta_box_html( $post ) {
  *
  * @param string $name     Field name.
  * @param int    $image_id Current attachment ID.
+ * @param string $type     'image' or 'video'.
  */
-function elvane_banner_image_field( $name, $image_id ) {
+function elvane_banner_image_field( $name, $image_id, $type = 'image' ) {
+	if ( 'video' === $type ) {
+		$preview = $image_id ? esc_html( basename( (string) get_attached_file( $image_id ) ) ) : '';
+		$choose  = __( 'Choose video', 'elvane-store' );
+	} else {
+		$preview = $image_id ? wp_get_attachment_image( $image_id, 'thumbnail' ) : '';
+		$choose  = __( 'Choose photo', 'elvane-store' );
+	}
 	?>
-	<div class="elvane-image-field">
-		<div class="elvane-image-field__preview"><?php echo $image_id ? wp_get_attachment_image( $image_id, 'thumbnail' ) : ''; ?></div>
+	<div class="elvane-image-field" data-type="<?php echo esc_attr( $type ); ?>">
+		<div class="elvane-image-field__preview"><?php echo $preview; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?></div>
 		<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( $image_id ? $image_id : '' ); ?>">
-		<button type="button" class="button elvane-image-field__choose"><?php esc_html_e( 'Choose photo', 'elvane-store' ); ?></button>
+		<button type="button" class="button elvane-image-field__choose"><?php echo esc_html( $choose ); ?></button>
 		<button type="button" class="button-link elvane-image-field__remove" <?php echo $image_id ? '' : 'hidden'; ?>><?php esc_html_e( 'Remove', 'elvane-store' ); ?></button>
 	</div>
 	<?php
@@ -229,6 +246,7 @@ function elvane_banner_save( $post_id ) {
 		'link_url'  => esc_url_raw( trim( $in['link_url'] ?? '' ) ),
 		'button'    => sanitize_text_field( $in['button'] ?? '' ),
 		'image2'    => absint( $in['image2'] ?? 0 ),
+		'video'     => elvane_banner_video_id( $in['video'] ?? 0 ),
 	);
 	foreach ( $save as $key => $value ) {
 		update_post_meta( $post_id, '_elvane_banner_' . $key, $value );
@@ -311,6 +329,35 @@ add_action( 'admin_enqueue_scripts', 'elvane_banner_admin_assets' );
 /* ---------- Home page ---------- */
 
 /**
+ * An attachment ID if it is a video, else 0.
+ *
+ * @param mixed $id Submitted attachment ID.
+ * @return int
+ */
+function elvane_banner_video_id( $id ) {
+	$id = absint( $id );
+	return $id && 0 === strpos( (string) get_post_mime_type( $id ), 'video/' ) ? $id : 0;
+}
+
+/**
+ * A silent looping video with the photo as its still (poster) image.
+ *
+ * @param int $video_id Video attachment ID.
+ * @param int $image_id Photo attachment ID (poster), or 0.
+ * @param bool $first   First screen: start loading straight away.
+ * @return string
+ */
+function elvane_banner_video_tag( $video_id, $image_id, $first ) {
+	$poster = $image_id ? wp_get_attachment_image_url( $image_id, 'large' ) : '';
+	return sprintf(
+		'<video class="elvane-banner-video" src="%s"%s autoplay muted loop playsinline preload="%s" aria-hidden="true"></video>',
+		esc_url( wp_get_attachment_url( $video_id ) ),
+		$poster ? ' poster="' . esc_url( $poster ) . '"' : '',
+		$first ? 'auto' : 'metadata'
+	);
+}
+
+/**
  * One photo, linked.
  *
  * @param int    $image_id Attachment ID.
@@ -320,7 +367,11 @@ add_action( 'admin_enqueue_scripts', 'elvane_banner_admin_assets' );
  * @param bool   $half     Takes half the screen width on computers.
  * @return string
  */
-function elvane_banner_photo( $image_id, $url, $class, $first, $half ) {
+function elvane_banner_photo( $image_id, $url, $class, $first, $half, $video_id = 0 ) {
+	if ( $video_id ) {
+		return sprintf( '<div class="%s"><a href="%s" tabindex="-1" aria-hidden="true">%s</a></div>',
+			esc_attr( $class ), esc_url( $url ), elvane_banner_video_tag( $video_id, $image_id, $first ) );
+	}
 	if ( ! $image_id ) {
 		return '';
 	}
@@ -347,8 +398,8 @@ function elvane_banner_html( $banner, $first, $extra = '' ) {
 	$photo   = (int) get_post_thumbnail_id( $banner );
 
 	if ( 'hero' === $s['layout'] ) {
-		$two    = $photo && $s['image2'];
-		$photos = elvane_banner_photo( $photo, $url, 'elvane-hero__img', $first, $two ) . elvane_banner_photo( $s['image2'], $url, 'elvane-hero__img', $first, $two );
+		$two    = ( $photo || $s['video'] ) && $s['image2'];
+		$photos = elvane_banner_photo( $photo, $url, 'elvane-hero__img', $first, $two, $s['video'] ) . elvane_banner_photo( $s['image2'], $url, 'elvane-hero__img', $first, $two );
 		$tag = $first ? 'h1' : 'h2';
 		return sprintf(
 			'<section class="elvane-hero elvane-stack%s">%s<div class="elvane-hero__caption"><%s class="elvane-display">%s</%s>%s</div></section>',
@@ -364,7 +415,7 @@ function elvane_banner_html( $banner, $first, $extra = '' ) {
 	return sprintf(
 		'<section class="elvane-tile %s">%s<div class="elvane-tile__caption"><h2 class="elvane-tile__eyebrow"><a href="%s">%s</a></h2>%s</div></section>',
 		esc_attr( $extra ),
-		elvane_banner_photo( $photo, $url, 'elvane-tile__img', $first, false !== strpos( $extra, 'elvane-tile--half' ) ),
+		elvane_banner_photo( $photo, $url, 'elvane-tile__img', $first, false !== strpos( $extra, 'elvane-tile--half' ), $s['video'] ),
 		esc_url( $url ),
 		$heading,
 		$cta
@@ -433,6 +484,11 @@ function elvane_category_banner_add_field() {
 		<?php elvane_banner_image_field( 'elvane_category_banner', 0 ); ?>
 		<p class="description"><?php esc_html_e( 'Full-width photo at the top of this category\'s page, with the category name on it. Leave empty for no banner.', 'elvane-store' ); ?></p>
 	</div>
+	<div class="form-field">
+		<label><?php esc_html_e( 'Banner video (optional)', 'elvane-store' ); ?></label>
+		<?php elvane_banner_image_field( 'elvane_category_banner_video', 0, 'video' ); ?>
+		<p class="description"><?php esc_html_e( 'A short MP4 that plays silently on a loop in place of the banner photo.', 'elvane-store' ); ?></p>
+	</div>
 	<?php
 }
 add_action( 'product_cat_add_form_fields', 'elvane_category_banner_add_field', 20 );
@@ -449,6 +505,13 @@ function elvane_category_banner_edit_field( $term ) {
 		<td>
 			<?php elvane_banner_image_field( 'elvane_category_banner', (int) get_term_meta( $term->term_id, 'elvane_banner_image', true ) ); ?>
 			<p class="description"><?php esc_html_e( 'Full-width photo at the top of this category\'s page, with the category name on it. Leave empty for no banner.', 'elvane-store' ); ?></p>
+		</td>
+	</tr>
+	<tr class="form-field">
+		<th scope="row"><label><?php esc_html_e( 'Banner video (optional)', 'elvane-store' ); ?></label></th>
+		<td>
+			<?php elvane_banner_image_field( 'elvane_category_banner_video', (int) get_term_meta( $term->term_id, 'elvane_banner_video', true ), 'video' ); ?>
+			<p class="description"><?php esc_html_e( 'A short MP4 that plays silently on a loop in place of the banner photo (the photo shows while it loads).', 'elvane-store' ); ?></p>
 		</td>
 	</tr>
 	<?php
@@ -470,21 +533,29 @@ function elvane_category_banner_save( $term_id ) {
 	} else {
 		delete_term_meta( $term_id, 'elvane_banner_image' );
 	}
+	$video_id = elvane_banner_video_id( $_POST['elvane_category_banner_video'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( $video_id ) {
+		update_term_meta( $term_id, 'elvane_banner_video', $video_id );
+	} else {
+		delete_term_meta( $term_id, 'elvane_banner_video' );
+	}
 }
 add_action( 'created_product_cat', 'elvane_category_banner_save' );
 add_action( 'edited_product_cat', 'elvane_category_banner_save' );
 
 /**
- * Banner image of the category being viewed, or 0.
+ * Banner of the category being viewed: [ photo ID, video ID ], or null.
  *
- * @return int
+ * @return int[]|null
  */
 function elvane_current_category_banner() {
 	if ( ! function_exists( 'is_product_category' ) || ! is_product_category() ) {
-		return 0;
+		return null;
 	}
 	$image_id = (int) get_term_meta( get_queried_object_id(), 'elvane_banner_image', true );
-	return $image_id && wp_attachment_is_image( $image_id ) ? $image_id : 0;
+	$image_id = $image_id && wp_attachment_is_image( $image_id ) ? $image_id : 0;
+	$video_id = elvane_banner_video_id( get_term_meta( get_queried_object_id(), 'elvane_banner_video', true ) );
+	return $image_id || $video_id ? array( $image_id, $video_id ) : null;
 }
 
 /**
@@ -505,14 +576,15 @@ add_filter( 'body_class', 'elvane_category_banner_body_class' );
  * The banner, above the product grid of the category page.
  */
 function elvane_category_banner() {
-	$image_id = elvane_current_category_banner();
-	if ( ! $image_id ) {
+	$banner = elvane_current_category_banner();
+	if ( ! $banner ) {
 		return;
 	}
+	list( $image_id, $video_id ) = $banner;
 	$description = term_description();
 	printf(
 		'<div class="elvane-category-banner">%s<h1 class="elvane-category-banner__title">%s</h1></div>%s',
-		wp_get_attachment_image( $image_id, 'full', false, array( 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '100vw' ) ),
+		$video_id ? elvane_banner_video_tag( $video_id, $image_id, true ) : wp_get_attachment_image( $image_id, 'full', false, array( 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '100vw' ) ),
 		esc_html( single_term_title( '', false ) ),
 		$description ? '<div class="elvane-category-banner__desc">' . wp_kses_post( $description ) . '</div>' : ''
 	);

@@ -3,12 +3,17 @@ jQuery( function ( $ ) {
 	$( document ).on( 'click', '.elvane-image-field__choose', function ( e ) {
 		e.preventDefault();
 		var field = $( this ).closest( '.elvane-image-field' );
-		var frame = wp.media( { title: 'Choose photo', library: { type: 'image' }, multiple: false } );
+		var isVideo = field.data( 'type' ) === 'video';
+		var frame = wp.media( { title: isVideo ? 'Choose video' : 'Choose photo', library: { type: isVideo ? 'video' : 'image' }, multiple: false } );
 		frame.on( 'select', function () {
 			var image = frame.state().get( 'selection' ).first().toJSON();
-			var thumb = image.sizes && image.sizes.thumbnail ? image.sizes.thumbnail.url : image.url;
 			field.find( 'input' ).val( image.id );
-			field.find( '.elvane-image-field__preview' ).html( $( '<img>', { src: thumb, alt: '', css: { maxWidth: '150px', height: 'auto' } } ) );
+			if ( isVideo ) {
+				field.find( '.elvane-image-field__preview' ).text( image.filename || image.title );
+			} else {
+				var thumb = image.sizes && image.sizes.thumbnail ? image.sizes.thumbnail.url : image.url;
+				field.find( '.elvane-image-field__preview' ).html( $( '<img>', { src: thumb, alt: '', css: { maxWidth: '150px', height: 'auto' } } ) );
+			}
 			field.find( '.elvane-image-field__remove' ).prop( 'hidden', false );
 		} );
 		frame.open();

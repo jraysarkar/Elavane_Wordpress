@@ -425,24 +425,35 @@
 	} );
 
 	// Links to the account, wishlist and checkout pages open the popup on the
-	// page the visitor is on (those pages need login), then go there after login.
+	// page the visitor is on (those pages need login). After login: wishlist and
+	// checkout continue to that page; the header Login link stays on this page.
+	// Caught in the capture phase, before the link's own handlers (the cart
+	// block's checkout button would otherwise start a spinner that never stops).
 	var trim = function ( url ) {
 		return url.split( /[?#]/ )[ 0 ].replace( /\/$/, '' );
 	};
-	var gated = ( settings.loginUrls || [] ).concat( settings.accountUrl ? [ settings.accountUrl ] : [] ).map( trim );
+	var account = settings.accountUrl ? trim( settings.accountUrl ) : '';
+	var gated = ( settings.loginUrls || [] ).map( trim );
+	var wishlist = settings.wishlistUrl ? trim( settings.wishlistUrl ) : '';
 	document.addEventListener( 'click', function ( event ) {
 		var link = event.target.closest && event.target.closest( 'a[href]' );
-		if ( ! link || link.closest( '#elvane-login' ) ) {
+		if ( ! link || link.closest( '#elvane-login' ) || event.button !== 0 ) {
 			return;
 		}
 		var href = trim( link.href );
-		// The wishlist also has per-list addresses (/wishlist/ABC123).
-		var wishlist = settings.wishlistUrl ? trim( settings.wishlistUrl ) : '';
-		if ( gated.indexOf( href ) !== -1 || ( wishlist && href.indexOf( wishlist + '/' ) === 0 ) ) {
-			event.preventDefault();
-			open( link.href );
+		var target = null;
+		if ( account && href === account ) {
+			target = window.location.href;
+		} else if ( gated.indexOf( href ) !== -1 || ( wishlist && href.indexOf( wishlist + '/' ) === 0 ) ) {
+			// The wishlist also has per-list addresses (/wishlist/ABC123).
+			target = link.href;
 		}
-	} );
+		if ( target !== null ) {
+			event.preventDefault();
+			event.stopPropagation();
+			open( target );
+		}
+	}, true );
 
 	// Opened by a redirect from a page that needs login (?otp_login=1&redirect_to=…).
 	var params = new URLSearchParams( window.location.search );

@@ -140,16 +140,19 @@ function elvane_thumbnail_size() {
 add_filter( 'woocommerce_get_image_size_thumbnail', 'elvane_thumbnail_size' );
 
 /**
- * Plain text pages (Privacy policy, Terms…: block-editor pages, not Elementor
- * or store pages) get the reading layout in elvane.css.
+ * Content pages (About, Privacy policy, Terms…: not the home or store pages)
+ * share the page-title style; plain text pages (block editor, not Elementor)
+ * also get the reading layout in elvane.css.
  *
  * @param string[] $classes Body classes.
  * @return string[]
  */
 function elvane_text_page_class( $classes ) {
-	if ( is_page() && ! is_front_page() && ! elvane_is_store_page()
-		&& 'builder' !== get_post_meta( get_queried_object_id(), '_elementor_edit_mode', true ) ) {
-		$classes[] = 'elvane-text-page';
+	if ( is_page() && ! is_front_page() && ! elvane_is_store_page() ) {
+		$classes[] = 'elvane-page';
+		if ( 'builder' !== get_post_meta( get_queried_object_id(), '_elementor_edit_mode', true ) ) {
+			$classes[] = 'elvane-text-page';
+		}
 	}
 	return $classes;
 }

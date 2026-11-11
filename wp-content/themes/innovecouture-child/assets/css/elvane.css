@@ -859,6 +859,74 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	}
 }
 
+/* ---------- Footer stays at the bottom on short pages ---------- */
+
+#page.main-container {
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - var(--elvane-announce-h) - var(--elvane-header-h));
+	min-height: calc(100svh - var(--elvane-announce-h) - var(--elvane-header-h));
+}
+
+#page.main-container > #main-content {
+	flex: 1 0 auto;
+}
+
+/* ---------- Content pages (About, policies…): page title ---------- */
+
+.elvane-page #sub-header .meta-header {
+	padding: 56px 0 28px;
+	background: none;
+}
+
+.elvane-page #sub-header .limit-wrapper {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	padding: 0 var(--elvane-gutter);
+}
+
+.elvane-page #sub-header h1 {
+	margin: 0;
+	color: var(--elvane-black);
+	font: 500 clamp(34px, 5vw, 56px)/1.05 var(--elvane-display);
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+}
+
+/* About: the story panel in the site's type (it came with the old theme's
+   red Montserrat heading) */
+.elementor-69 .elementor-element-b53e625 {
+	justify-content: center;
+	padding: clamp(40px, 6vw, 96px) clamp(24px, 5vw, 80px) !important;
+}
+
+.elementor-69 .elementor-element-4a85418 .elementor-heading-title {
+	color: #bbb !important;
+	font: 400 12px/1.4 var(--elvane-font) !important;
+	letter-spacing: 0.08em !important;
+	text-transform: uppercase;
+}
+
+.elementor-69 .elementor-element-75c9592 .elementor-heading-title {
+	margin: 8px 0 24px;
+	color: var(--elvane-white) !important;
+	font: 500 clamp(52px, 6vw, 96px)/0.95 var(--elvane-display) !important;
+	letter-spacing: -0.01em !important;
+	text-transform: uppercase;
+}
+
+.elementor-69 .elementor-element-5adc0a8 p {
+	max-width: 520px;
+	margin: 0 0 14px;
+	color: #cfcfcf !important;
+	font: 400 14px/1.75 var(--elvane-font) !important;
+}
+
+.elementor-69 .elementor-element-5adc0a8 p:nth-last-child(-n + 2) {
+	color: var(--elvane-white) !important;
+}
+
 /* ---------- Text pages (Privacy policy, Terms…): readable column ---------- */
 
 .elvane-text-page #sub-header .meta-header,
@@ -872,16 +940,7 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 }
 
 .elvane-text-page #sub-header .meta-header {
-	padding: 56px 0 8px;
-	background: none;
-}
-
-.elvane-text-page #sub-header h1 {
-	margin: 0;
-	color: var(--elvane-black);
-	font: 500 clamp(34px, 5vw, 56px)/1.05 var(--elvane-display);
-	letter-spacing: -0.01em;
-	text-transform: uppercase;
+	padding-bottom: 8px;
 }
 
 .elvane-text-page .page-content {

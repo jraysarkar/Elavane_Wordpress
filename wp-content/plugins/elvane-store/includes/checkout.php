@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout rules: payment-based delivery charge, Buy Now, WELCOME200,
+ * Checkout rules: payment-based delivery charge, Buy Now, first-order-only coupons,
  * profile sync and the thank-you message.
  *
  * @package ElvaneStore
@@ -8,13 +8,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-/** COD delivery charge in rupees, inclusive of GST. Razorpay (prepaid) is free. */
-const ELVANE_COD_DELIVERY = 100;
-
 /* ---------- Delivery charge by payment method ---------- */
 
 /**
- * COD: ₹100 including GST (₹95.24 + 5% → CGST/SGST or IGST). Razorpay: free.
+ * Delivery charge by payment method, set in Banners → Site settings (amounts
+ * include GST, split into CGST/SGST or IGST): Cash on delivery, and prepaid
+ * (Razorpay) — 0 shows "Free".
  *
  * @param WC_Shipping_Rate[] $rates   Rates for the package.
  * @param array              $package Shipping package.
@@ -31,15 +30,23 @@ function elvane_delivery_charge_by_payment( $rates, $package ) {
 		$method = elvane_default_payment_method();
 	}
 
+	if ( 'cod' === $method ) {
+		$charge = (float) elvane_site( 'cod_charge' );
+	} elseif ( false !== strpos( $method, 'razorpay' ) ) {
+		$charge = (float) elvane_site( 'prepaid_charge' );
+	} else {
+		return $rates;
+	}
+
 	foreach ( $rates as $rate ) {
-		if ( false !== strpos( $method, 'razorpay' ) ) {
+		if ( $charge <= 0 ) {
 			$rate->set_cost( 0 );
 			$rate->set_taxes( array() );
-		} elseif ( 'cod' === $method ) {
-			$taxes = WC_Tax::calc_tax( ELVANE_COD_DELIVERY, WC_Tax::get_shipping_tax_rates(), true );
-			$rate->set_cost( ELVANE_COD_DELIVERY - array_sum( $taxes ) );
-			$rate->set_taxes( $taxes );
+			continue;
 		}
+		$taxes = WC_Tax::calc_tax( $charge, WC_Tax::get_shipping_tax_rates(), true );
+		$rate->set_cost( $charge - array_sum( $taxes ) );
+		$rate->set_taxes( $taxes );
 	}
 
 	return $rates;
@@ -191,7 +198,7 @@ function elvane_buy_now_redirect() {
 }
 add_action( 'wp_loaded', 'elvane_buy_now_redirect', 21 );
 
-/* ---------- WELCOME200: first order only, logged-in customers only ---------- */
+/* ---------- "First order only" coupons (tick box on the coupon, see site-settings.php) ---------- */
 
 /**
  * @param bool      $valid  Current validity.
@@ -199,8 +206,8 @@ add_action( 'wp_loaded', 'elvane_buy_now_redirect', 21 );
  * @return bool
  * @throws Exception When the coupon may not be used.
  */
-function elvane_welcome200_first_order_only( $valid, $coupon ) {
-	if ( 'welcome200' !== strtolower( $coupon->get_code() ) ) {
+function elvane_first_order_only_coupon( $valid, $coupon ) {
+	if ( 'yes' !== get_post_meta( $coupon->get_id(), 'elvane_first_order_only', true ) ) {
 		return $valid;
 	}
 	if ( ! is_user_logged_in() ) {
@@ -215,11 +222,12 @@ function elvane_welcome200_first_order_only( $valid, $coupon ) {
 		)
 	);
 	if ( $orders ) {
-		throw new Exception( esc_html__( 'WELCOME200 is valid only on your first order.', 'elvane-store' ) );
+		/* translators: %s: coupon code */
+		throw new Exception( esc_html( sprintf( __( '%s is valid only on your first order.', 'elvane-store' ), strtoupper( $coupon->get_code() ) ) ) );
 	}
 	return $valid;
 }
-add_filter( 'woocommerce_coupon_is_valid', 'elvane_welcome200_first_order_only', 10, 2 );
+add_filter( 'woocommerce_coupon_is_valid', 'elvane_first_order_only_coupon', 10, 2 );
 
 /* ---------- One coupon per order ---------- */
 

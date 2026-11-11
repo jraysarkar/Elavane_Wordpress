@@ -100,11 +100,19 @@
 		return track;
 	};
 
+	// Messages from Banners → Site settings ([elvane_announcement], data-items).
+	var readList = function ( el, attr ) {
+		try {
+			var list = JSON.parse( el.getAttribute( attr ) || '[]' );
+			return Array.isArray( list ) ? list.filter( Boolean ) : [];
+		} catch ( e ) {
+			return [];
+		}
+	};
+
 	var announcement = document.querySelector( '.elvane-announcement__text' );
-	if ( announcement ) {
-		var notes = announcement.textContent.split( '·' ).map( function ( s ) {
-			return s.trim();
-		} ).filter( Boolean );
+	var notes = announcement ? readList( announcement, 'data-items' ) : [];
+	if ( announcement && notes.length ) {
 		var label = document.createElement( 'span' );
 		label.className = 'screen-reader-text';
 		label.textContent = announcement.textContent;
@@ -113,14 +121,16 @@
 		buildMarquee( announcement, notes, 40 );
 	}
 
-	// Home: a large brand strip above New arrivals that speeds up (and turns
-	// round) with the scroll.
-	var newArrivals = document.querySelector( 'body.home .elvane-section' );
-	if ( newArrivals ) {
+	// Home: a large strip of words (Banners → Site settings) above the latest
+	// products that speeds up (and turns round) with the scroll.
+	var home = document.querySelector( '.elvane-home' );
+	var stripWords = home ? readList( home, 'data-strip' ) : [];
+	var newArrivals = home && home.querySelector( '.elvane-section' );
+	if ( newArrivals && stripWords.length ) {
 		var strip = document.createElement( 'div' );
 		strip.className = 'elvane-strip';
 		newArrivals.insertBefore( strip, newArrivals.firstChild );
-		var stripTrack = buildMarquee( strip, [ 'Less noise', 'More style', 'New arrivals', 'Elvane' ], 70 );
+		var stripTrack = buildMarquee( strip, stripWords, 70 );
 		if ( stripTrack.getAnimations ) {
 			var anim = null;
 			var lastY = window.scrollY;

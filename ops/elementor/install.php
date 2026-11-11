@@ -30,22 +30,21 @@ function elvane_menu() {
 	$add = function ( $title, $url, $parent = 0 ) use ( $menu_id ) {
 		return wp_update_nav_menu_item( $menu_id, 0, array(
 			'menu-item-title'     => $title,
-			'menu-item-url'       => home_url( $url ),
+			'menu-item-url'       => $url,
 			'menu-item-status'    => 'publish',
 			'menu-item-type'      => 'custom',
 			'menu-item-parent-id' => $parent,
 		) );
 	};
 
-	$shop = $add( 'Shop', '/shop/' );
-	$add( 'Shop all', '/shop/', $shop );
-	$trousers = $add( 'Trousers', '/product-category/trousers/', $shop );
-	foreach ( array( 'Cargo' => 'cargo', 'Smart' => 'smart', 'Linen' => 'linen', 'Relaxed' => 'relaxed' ) as $title => $slug ) {
-		$add( $title, "/product-category/trousers/$slug/", $trousers );
+	// Shop's categories are added at display time from Products → Categories
+	// (innovecouture-child functions.php); more links: Appearance → Menus.
+	$shop = $add( 'Shop', wc_get_page_permalink( 'shop' ) );
+	$add( 'Shop all', wc_get_page_permalink( 'shop' ), $shop );
+	$about = get_page_by_path( 'about-us' );
+	if ( $about ) {
+		$add( 'About', get_permalink( $about ) );
 	}
-	$tees = $add( 'T-shirts', '/product-category/t-shirt/', $shop );
-	$add( 'Polos', '/product-category/t-shirt/polo/', $tees );
-	$add( 'About', '/about-us/' );
 
 	return $menu_id;
 }
@@ -159,6 +158,10 @@ if ( $icon_id ) {
 }
 
 $logo_id = elvane_attachment_id( 'elvane-logo-black' );
+// The header shows the Site Logo; set it once if the site has none.
+if ( $logo_id && ! get_theme_mod( 'custom_logo' ) ) {
+	set_theme_mod( 'custom_logo', $logo_id );
+}
 if ( $logo_id ) {
 	$logo_url = wp_get_attachment_url( $logo_id );
 	update_option( 'woocommerce_email_header_image', $logo_url );

@@ -309,12 +309,18 @@ function elvane_phone_login_popup() {
 	}
 	$reverify = is_user_logged_in();
 	$my_phone = $reverify ? substr( preg_replace( '/\D/', '', (string) get_user_meta( get_current_user_id(), 'phone_number', true ) ), -10 ) : '';
-	$image = apply_filters( 'elvane_login_popup_image', wp_get_upload_dir()['baseurl'] . '/2026/05/baggy43.png' );
+	// Photo from Banners → Site settings, else the first home banner's photo.
+	$image_id = (int) elvane_site( 'login_image' );
+	if ( ! $image_id ) {
+		$first    = get_posts( array( 'post_type' => 'elvane_banner', 'post_status' => 'publish', 'numberposts' => 1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'fields' => 'ids' ) );
+		$image_id = $first ? (int) get_post_thumbnail_id( $first[0] ) : 0;
+	}
+	$image = apply_filters( 'elvane_login_popup_image', $image_id ? (string) wp_get_attachment_image_url( $image_id, 'large' ) : '' );
 	?>
 	<div class="elvane-login" id="elvane-login" role="dialog" aria-modal="true" aria-labelledby="elvane-login-title" hidden>
 		<div class="elvane-login__backdrop" data-elvane-login-close></div>
 		<div class="elvane-login__panel">
-			<div class="elvane-login__media" style="background-image:url('<?php echo esc_url( $image ); ?>')"></div>
+			<div class="elvane-login__media"<?php echo $image ? ' style="background-image:url(\'' . esc_url( $image ) . '\')"' : ''; ?>></div>
 			<div class="elvane-login__body">
 				<button type="button" class="elvane-login__close" data-elvane-login-close aria-label="<?php esc_attr_e( 'Close', 'elvane-store' ); ?>">×</button>
 

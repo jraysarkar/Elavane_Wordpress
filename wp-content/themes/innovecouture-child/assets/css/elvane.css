@@ -1715,86 +1715,53 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	font: 400 12px/1.4 var(--elvane-font) !important;
 }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer ([elvane_footer]: links from Banners → Site settings) ---------- */
 
 .elvane-footer.e-con {
-	--align-items: center;
-	--gap: 22px;
-	align-items: center;
-	gap: 22px;
 	padding: 56px var(--elvane-gutter) 24px;
 	background: var(--elvane-white);
 	border-top: 1px solid var(--elvane-line);
 	text-align: center;
 }
 
-/* Rows take the full width so they never clip once the web font swaps in */
-.elvane-footer .elementor-widget-icon-list,
-.elvane-footer .elementor-widget-icon-list .elementor-widget-container {
+.elvane-footer .elementor-widget-shortcode,
+.elvane-footer .elementor-shortcode {
 	width: 100%;
-	max-width: none;
-	overflow: visible;
 }
 
-.elvane-footer__bottom .elementor-widget-icon-list,
-.elvane-footer__bottom .elementor-widget-text-editor {
-	width: auto;
-}
-
-.elvane-footer .elementor-icon-list-items {
+.elvane-footer__social,
+.elvane-footer__legal {
 	display: flex;
-	width: 100%;
-	margin: 0 !important;
-	overflow: visible;
 	flex-wrap: wrap;
 	justify-content: center;
 	gap: 8px 28px;
 }
 
-.elvane-footer .elementor-icon-list-item {
-	margin: 0 !important;
-	padding: 0 !important;
-}
-
-.elvane-footer .elementor-icon-list-item::after,
-.elvane-footer .elementor-icon-list-icon {
-	display: none !important;
-}
-
-.elvane-footer .elementor-icon-list-item > a {
-	padding: 0 !important;
-}
-
-.elvane-footer .elementor-icon-list-text {
-	margin: 0 !important;
-	padding: 0 !important;
-	text-indent: 0 !important;
+.elvane-footer a {
 	color: var(--elvane-black);
 	font: 400 12px/1.6 var(--elvane-font);
 	letter-spacing: 0.04em;
+	text-decoration: none;
 	text-transform: uppercase;
+	transition: opacity 0.2s var(--elvane-ease);
 }
 
-.elvane-footer a:hover .elementor-icon-list-text {
+.elvane-footer a:hover {
 	opacity: 0.55;
 }
 
-.elvane-footer__bottom.e-con {
-	--flex-direction: row;
-	--justify-content: space-between;
-	--align-items: center;
-	flex-direction: row;
+.elvane-footer__bottom {
+	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
-	flex-wrap: wrap;
 	gap: 12px;
-	width: 100%;
-	margin-top: 24px;
+	margin-top: 46px;
 	padding-top: 20px;
 	border-top: 1px solid var(--elvane-line);
 }
 
-.elvane-footer__copy p {
+.elvane-footer__copy {
 	margin: 0;
 	color: var(--elvane-grey-text);
 	font: 400 11px/1 var(--elvane-font);
@@ -1802,9 +1769,18 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	text-transform: uppercase;
 }
 
-.elvane-footer__legal .elementor-icon-list-text {
+.elvane-footer__legal a {
 	color: var(--elvane-grey-text);
 	font-size: 11px;
+}
+
+/* No announcement set: no black bar (and the header sits at the top) */
+.elvane-no-announcement {
+	--elvane-announce-h: 0px;
+}
+
+.elvane-no-announcement .elvane-announcement {
+	display: none !important;
 }
 
 /* ---------- Responsive ---------- */
@@ -1903,8 +1879,7 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 		min-height: 320px;
 	}
 
-	.elvane-footer__bottom.e-con {
-		--justify-content: center;
+	.elvane-footer__bottom {
 		justify-content: center;
 	}
 }

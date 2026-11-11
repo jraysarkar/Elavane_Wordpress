@@ -300,7 +300,7 @@ add_action( 'pre_get_posts', 'elvane_banner_admin_order' );
  */
 function elvane_banner_admin_assets( $hook ) {
 	$screen = get_current_screen();
-	if ( ! $screen || ! ( 'elvane_banner' === $screen->post_type || 'edit-product_cat' === $screen->id ) ) {
+	if ( ! $screen || ! ( 'elvane_banner' === $screen->post_type || in_array( $screen->id, array( 'edit-product_cat', 'elvane_banner_page_elvane-site-settings' ), true ) ) ) {
 		return;
 	}
 	wp_enqueue_media();
@@ -404,15 +404,20 @@ function elvane_home_shortcode() {
 		$html .= elvane_banner_html( $banners[ $i ], $first, 'elvane-stack' );
 	}
 
-	$html .= sprintf(
-		'<section class="elvane-section"><div class="elvane-section__head"><h2 class="elvane-section__title">%s</h2><span class="elvane-textlink"><a href="%s">%s</a></span></div><div class="elvane-products">%s</div></section>',
-		esc_html__( 'New arrivals', 'elvane-store' ),
-		esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ),
-		esc_html__( 'View all', 'elvane-store' ),
-		do_shortcode( '[products limit="8" columns="4" orderby="date" order="DESC"]' )
-	);
+	// Latest products (heading, link text and number from Banners → Site settings).
+	$count = (int) elvane_site( 'new_count' );
+	if ( $count > 0 ) {
+		$link  = elvane_site( 'new_link' );
+		$html .= sprintf(
+			'<section class="elvane-section"><div class="elvane-section__head"><h2 class="elvane-section__title">%s</h2>%s</div><div class="elvane-products">%s</div></section>',
+			esc_html( elvane_site( 'new_title' ) ),
+			$link ? '<span class="elvane-textlink"><a href="' . esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ) . '">' . esc_html( $link ) . '</a></span>' : '',
+			do_shortcode( sprintf( '[products limit="%d" columns="4" orderby="date" order="DESC"]', $count ) )
+		);
+	}
 
-	return '<div class="elvane-home">' . $html . '</div>';
+	// The large scrolling words above the latest products (elvane-motion.js).
+	return sprintf( '<div class="elvane-home" data-strip="%s">%s</div>', esc_attr( wp_json_encode( elvane_site_lines( 'strip' ) ) ), $html );
 }
 add_shortcode( 'elvane_home', 'elvane_home_shortcode' );
 

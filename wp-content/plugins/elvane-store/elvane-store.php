@@ -24,6 +24,7 @@ require_once ELVANE_STORE_DIR . 'includes/gst-labels.php';
 require_once ELVANE_STORE_DIR . 'includes/shipment.php';
 require_once ELVANE_STORE_DIR . 'includes/shipment-sync.php';
 require_once ELVANE_STORE_DIR . 'includes/banners.php';
+require_once ELVANE_STORE_DIR . 'includes/site-settings.php';
 
 /**
  * Asset version: file modification time, so every deploy busts caches.

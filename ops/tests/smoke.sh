@@ -6,17 +6,21 @@
 set -uo pipefail
 
 BASE="${1:-https://dev.elvaneclothing.com}"
+
+# Products and categories come from the store itself (whatever is in the admin
+# today): the newest two products and every category with products.
+path_of() { python3 -c 'import json,sys,urllib.parse; [print(urllib.parse.urlparse(x["permalink"]).path) for x in json.load(sys.stdin)]'; }
+PRODUCTS=$(curl -s -m 60 "$BASE/wp-json/wc/store/v1/products?per_page=2&orderby=date&order=desc" | path_of)
+CATEGORIES=$(curl -s -m 60 "$BASE/wp-json/wc/store/v1/products/categories?hide_empty=true&per_page=100" | path_of)
+[[ -n "$PRODUCTS" && -n "$CATEGORIES" ]] || { echo "FAIL could not list products/categories from the Store API"; exit 1; }
+
 PAGES=(
 	"/"
 	"/shop/"
-	"/product-category/trousers/"
-	"/product-category/t-shirt/polo/"
-	"/product/baggy-fit-textured-cotton-trousers/"
-	"/product/ice-blue-classic-fit-polo/"
+	$CATEGORIES
+	$PRODUCTS
 	"/cart/"
-	"/order-tracking/"
-	"/contact-us/"
-	"/?s=trouser&post_type=product"
+	"/?s=$(basename "$(head -n1 <<<"$PRODUCTS")" | cut -d- -f1)&post_type=product"
 )
 
 fail=0

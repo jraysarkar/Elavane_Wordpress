@@ -246,6 +246,55 @@ function elvane_shop_menu_from_categories( $items, $menu ) {
 add_filter( 'wp_get_nav_menu_items', 'elvane_shop_menu_from_categories', 10, 2 );
 
 /**
+ * Phone menu: Wishlist and Login / My account at the end (on phones the header
+ * only has room for the account and bag icons). Hidden in the computer menu,
+ * where they are header links already.
+ *
+ * @param WP_Post[] $items Menu items.
+ * @param stdClass  $args  Menu arguments.
+ * @return WP_Post[]
+ */
+function elvane_phone_menu_links( $items, $args ) {
+	$menu = isset( $args->menu ) ? $args->menu : null;
+	$slug = $menu instanceof WP_Term ? $menu->slug : ( is_string( $menu ) ? $menu : '' );
+	if ( 'elvane-main' !== $slug || ! function_exists( 'wc_get_page_permalink' ) ) {
+		return $items;
+	}
+	$links = array(
+		array( __( 'Wishlist', 'elvane' ), get_permalink( get_page_by_path( 'wishlist' ) ) ),
+		array( is_user_logged_in() ? __( 'My account', 'elvane' ) : __( 'Login', 'elvane' ), wc_get_page_permalink( 'myaccount' ) ),
+	);
+	$order = 9000;
+	foreach ( $links as $i => list( $title, $url ) ) {
+		if ( ! $url ) {
+			continue;
+		}
+		$item                   = new stdClass();
+		$item->ID               = 910000000 + $i;
+		$item->db_id            = $item->ID;
+		$item->post_type        = 'nav_menu_item';
+		$item->menu_item_parent = '0';
+		$item->object_id        = '0';
+		$item->object           = 'custom';
+		$item->type             = 'custom';
+		$item->title            = $title;
+		$item->url              = $url;
+		$item->target           = '';
+		$item->attr_title       = '';
+		$item->description      = '';
+		$item->classes          = array( 'elvane-menu-phone-only' );
+		$item->xfn              = '';
+		$item->menu_order       = ++$order;
+		$item->current          = false;
+		$item->current_item_ancestor = false;
+		$item->current_item_parent   = false;
+		$items[]                = new WP_Post( $item );
+	}
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'elvane_phone_menu_links', 10, 2 );
+
+/**
  * Lets the CSS treat the home page header as transparent over the hero.
  *
  * @param string[] $classes Body classes.

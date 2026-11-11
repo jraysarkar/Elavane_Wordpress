@@ -556,6 +556,109 @@ body {
 	content: ")";
 }
 
+/* ---------- Header on phones, as shops usually lay it out: menu + search on the left,
+   logo in the middle, account + bag (with count) on the right. Wishlist and Login /
+   My account are also links in the menu (functions.php). ---------- */
+
+@media (max-width: 767px) {
+	:root {
+		--elvane-icon-account: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7'/%3E%3C/svg%3E");
+		--elvane-icon-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4.5-4.5'/%3E%3C/svg%3E");
+		--elvane-icon-bag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8.5h14l-1.2 12.5H6.2L5 8.5z'/%3E%3Cpath d='M9 8.5V6.5a3 3 0 0 1 6 0v2'/%3E%3C/svg%3E");
+	}
+
+	.elvane-header__right.e-con {
+		--gap: 14px;
+		gap: 14px;
+	}
+
+	/* Account is a text link on computers and hidden on phones; show it as an icon */
+	.elvane-header__right .elvane-account-link.elvane-hide-mobile {
+		display: block !important;
+	}
+
+	/* Search sits on the left, beside the menu button */
+	.elvane-header__right.e-con {
+		position: static;
+	}
+
+	.elvane-header .elvane-search {
+		position: absolute;
+		top: 50%;
+		left: calc(var(--elvane-gutter) + 40px);
+		width: auto;
+		transform: translateY(-50%);
+	}
+
+	.elvane-header__right .elvane-account-link .elementor-heading-title a,
+	.elvane-search .dgwt-wcas-search-icon {
+		display: block;
+		font-size: 0 !important;
+		line-height: 0;
+	}
+
+	.elvane-header__right .elvane-account-link .elementor-heading-title a::before,
+	.elvane-search .dgwt-wcas-search-icon::after,
+	.elvane-bag .xoo-wsc-sc-bkcont::before {
+		content: "";
+		display: block;
+		width: 22px;
+		height: 22px;
+		margin: 0;
+		background: var(--elvane-black);
+		-webkit-mask: var(--elvane-icon) center / contain no-repeat;
+		mask: var(--elvane-icon) center / contain no-repeat;
+	}
+
+	.elvane-header__right .elvane-account-link {
+		--elvane-icon: var(--elvane-icon-account);
+	}
+
+	.elvane-search {
+		--elvane-icon: var(--elvane-icon-search);
+	}
+
+	.elvane-bag {
+		--elvane-icon: var(--elvane-icon-bag);
+	}
+
+	/* Logged in, the account icon stays (no "Account" word) */
+	.logged-in .elvane-account-link .elementor-heading-title a::after {
+		content: none;
+	}
+
+	/* Bag count as a small badge on the bag */
+	.elvane-bag .xoo-wsc-sc-bkcont {
+		position: relative;
+	}
+
+	.elvane-bag .xoo-wsc-sc-count {
+		position: absolute;
+		top: -5px;
+		right: -7px;
+		min-width: 16px;
+		height: 16px;
+		padding: 0 4px;
+		box-sizing: border-box;
+		border-radius: 8px;
+		background: var(--elvane-black);
+		color: var(--elvane-white);
+		font: 600 9px/16px var(--elvane-font);
+		letter-spacing: 0;
+		text-align: center;
+	}
+
+	.elvane-bag .xoo-wsc-sc-count::before,
+	.elvane-bag .xoo-wsc-sc-count::after {
+		content: none;
+	}
+}
+
+/* Wishlist / Login links added to the menu for phones only (functions.php) */
+.elvane-nav .elementor-nav-menu--main .elvane-menu-phone-only {
+	display: none !important;
+}
+
 /* ---------- Home: hero, full-bleed tiles (banners from the admin, elvane-store [elvane_home]) ---------- */
 
 .elvane-home {

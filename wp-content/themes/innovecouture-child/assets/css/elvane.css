@@ -977,6 +977,13 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 
 /* ---------- Product grid (shop, categories, home) ---------- */
 
+/* The theme's photo arrows on product cards: their icon font is not loaded,
+   so they showed as empty white circles. Every photo is on the product page. */
+.woocommerce ul.products li.product .swiper-button-prev,
+.woocommerce ul.products li.product .swiper-button-next {
+	display: none !important;
+}
+
 .woocommerce ul.products,
 .elvane-products ul.products {
 	display: grid !important;
@@ -1217,7 +1224,7 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 /* Smart Variations Images slider (swipe left/right): every slide is a 2:3
    frame, so the gallery does not jump between model photos and square
    product-only photos (those sit centred on white). */
-.single-product .sviproslider .swiper-slide {
+.single-product .sviproslider .svi-gallery-top .swiper-slide {
 	aspect-ratio: 2 / 3;
 	height: auto !important;
 	background: var(--elvane-white);
@@ -1227,13 +1234,29 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	height: auto !important;
 }
 
-.single-product div.product > .gallery-svi .sviproslider .swiper-slide img {
+.single-product div.product > .gallery-svi .sviproslider .svi-gallery-top .swiper-slide img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
 }
 
+/* Thumbnails: small, all the same 2:3 shape, photo filling the frame */
+.single-product .sviproslider .svi-gallery-thumbs .swiper-slide {
+	height: auto !important;
+	aspect-ratio: 2 / 3;
+	overflow: hidden;
+	background: var(--elvane-white);
+}
+
+.single-product div.product > .gallery-svi .sviproslider .svi-gallery-thumbs .swiper-slide img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center top;
+}
+
 .single-product .svi-gallery-thumbs {
+	box-sizing: border-box;
 	margin-top: 8px;
 	padding: 0 8px 8px;
 }
@@ -1815,10 +1838,6 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 		padding: 0 8px !important;
 	}
 
-	.woocommerce ul.products li.product .swiper-button-prev,
-	.woocommerce ul.products li.product .swiper-button-next {
-		display: none;
-	}
 }
 
 @media (max-width: 782px) {

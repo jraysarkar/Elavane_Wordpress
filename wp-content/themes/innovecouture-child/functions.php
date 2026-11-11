@@ -159,6 +159,93 @@ function elvane_text_page_class( $classes ) {
 add_filter( 'body_class', 'elvane_text_page_class' );
 
 /**
+ * Header "Shop" menu: built from the product categories, so a category added
+ * in Products → Categories shows up by itself (sub-categories under their
+ * parent, in the order set there; categories without products are left out).
+ * "Shop all" stays first. Other menu items are left as they are.
+ *
+ * @param WP_Post[] $items Menu items.
+ * @param WP_Term   $menu  Menu.
+ * @return WP_Post[]
+ */
+function elvane_shop_menu_from_categories( $items, $menu ) {
+	if ( is_admin() || ! $menu || 'elvane-main' !== $menu->slug || ! function_exists( 'wc_get_page_permalink' ) ) {
+		return $items;
+	}
+	$shop_url = untrailingslashit( wc_get_page_permalink( 'shop' ) );
+	$shop     = null;
+	foreach ( $items as $item ) {
+		if ( ! $item->menu_item_parent && untrailingslashit( $item->url ) === $shop_url ) {
+			$shop = $item;
+			break;
+		}
+	}
+	$terms = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'hide_empty' => false,
+		'menu_order' => 'ASC',
+	) );
+	if ( ! $shop || is_wp_error( $terms ) || ! $terms ) {
+		return $items;
+	}
+
+	// Drop the hand-made links under Shop, keep "Shop all" (a link to the shop page itself).
+	$under_shop = array( (int) $shop->ID );
+	$kept       = array();
+	foreach ( $items as $item ) {
+		if ( in_array( (int) $item->menu_item_parent, $under_shop, true ) ) {
+			if ( untrailingslashit( $item->url ) === $shop_url ) {
+				$kept[] = $item;
+			} else {
+				$under_shop[] = (int) $item->ID;
+			}
+			continue;
+		}
+		$kept[] = $item;
+	}
+
+	$order = 1000;
+	$ids   = array();
+	foreach ( $terms as $term ) {
+		$ids[ $term->term_id ] = 900000000 + $term->term_id;
+	}
+	foreach ( $terms as $term ) {
+		$products = (int) get_term_meta( $term->term_id, 'product_count_product_cat', true );
+		if ( 'uncategorized' === $term->slug || ( $products < 1 && $term->count < 1 ) ) {
+			continue;
+		}
+		if ( $term->parent && ! isset( $ids[ $term->parent ] ) ) {
+			continue;
+		}
+		$item                   = new stdClass();
+		$item->ID               = $ids[ $term->term_id ];
+		$item->db_id            = $item->ID;
+		$item->post_type        = 'nav_menu_item';
+		$item->menu_item_parent = (string) ( $term->parent ? $ids[ $term->parent ] : $shop->ID );
+		$item->object_id        = (string) $term->term_id;
+		$item->object           = 'product_cat';
+		$item->type             = 'taxonomy';
+		$item->type_label       = __( 'Product category', 'elvane' );
+		$item->title            = $term->name;
+		$item->url              = get_term_link( $term );
+		$item->target           = '';
+		$item->attr_title       = '';
+		$item->description      = '';
+		$item->classes          = array( '', 'menu-item-product_cat-' . $term->slug );
+		$item->xfn              = '';
+		$item->menu_order       = ++$order;
+		$item->post_status      = 'publish';
+		$item->post_parent      = 0;
+		$kept[]                 = new WP_Post( $item );
+	}
+
+	// Sub-categories of empty parents were skipped above; keep only items whose parent is present.
+	$present = array_map( fn( $i ) => (int) $i->ID, $kept );
+	return array_values( array_filter( $kept, fn( $i ) => ! $i->menu_item_parent || in_array( (int) $i->menu_item_parent, $present, true ) ) );
+}
+add_filter( 'wp_get_nav_menu_items', 'elvane_shop_menu_from_categories', 10, 2 );
+
+/**
  * Lets the CSS treat the home page header as transparent over the hero.
  *
  * @param string[] $classes Body classes.

@@ -33,6 +33,15 @@
 		params.set( 'elvane_buy_now', '1' );
 
 		var url = button.getAttribute( 'data-checkout' );
-		window.location.assign( url + ( url.indexOf( '?' ) === -1 ? '?' : '&' ) + params.toString() );
+		url += ( url.indexOf( '?' ) === -1 ? '?' : '&' ) + params.toString();
+
+		// Logged out: checkout needs login, so log in here first (popup, no page
+		// change); the Buy Now link then runs and lands on checkout.
+		var login = window.elvanePhoneLogin;
+		if ( login && login.accountUrl && typeof window.elvaneOpenLogin === 'function' ) {
+			window.elvaneOpenLogin( url );
+			return;
+		}
+		window.location.assign( url );
 	} );
 } )();

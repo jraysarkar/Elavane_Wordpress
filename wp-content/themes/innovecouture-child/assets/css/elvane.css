@@ -1271,6 +1271,14 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	opacity: 1;
 }
 
+/* Phones and tablets: no thumbnail strip — customers swipe the photo left
+   and right (iOS Safari also sized the strip's slides to full height). */
+@media (max-width: 1024px) {
+	.single-product .sviproslider .svi-gallery-thumbs {
+		display: none !important;
+	}
+}
+
 /* Hover zoom (Smart Variations Images "inner" lens): no grey frame */
 .single-product .zoomWindow {
 	border: 0 !important;

@@ -827,10 +827,43 @@
 	min-height: 50px !important;
 }
 
-/* Gift card box from the gift-card plugin */
-.elvane-store-page .pwgc-apply-gift-card,
-.elvane-store-page [class*="gift-card"] input[type="text"] {
-	width: 100%;
+/* Checkout order summary: one grey panel, as on the cart. WooCommerce adds
+   its own rounded, bordered box with 16px insets inside it, so the title and
+   the rows did not line up. */
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block {
+	border: 0 !important;
+	border-radius: 0 !important;
+}
+
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title {
+	margin-top: 0 !important;
+	padding: 0 !important;
+}
+
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-order-summary,
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .checkout-order-summary-block-fill .wc-block-components-totals-item,
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .checkout-order-summary-block-fill .wc-block-components-totals-coupon {
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
+/* Empty total rows (no fee, no discount) stay hidden, as WooCommerce intends
+   (the padded, bordered rows above would otherwise show as blank bands). */
+.elvane-store-page .wc-block-components-totals-wrapper:is(:empty, :has(> :only-child:empty)) {
+	padding: 0 !important;
+	border-top: 0 !important;
+}
+
+/* Shipping and payment option boxes: a square outline that meets the square
+   options (WooCommerce's is rounded, which left gaps at the corners). */
+.elvane-store-page .wc-block-components-radio-control--highlight-checked::after {
+	border-color: var(--elvane-line) !important;
+	border-radius: 0 !important;
+}
+
+.elvane-store-page .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.elvane-store-page .wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted {
+	border-radius: 0 !important;
 }
 
 /* Checkout steps */

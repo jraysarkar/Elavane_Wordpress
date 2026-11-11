@@ -654,6 +654,12 @@ body {
 	}
 }
 
+/* Add to cart opens the side cart instead of a message (elvane-store); the theme
+   still draws an empty message box, so hide it while it has no text. */
+.woocommerce-message:has(.vamtam-wc-msg:empty) {
+	display: none !important;
+}
+
 /* Wishlist / Login links added to the menu for phones only (functions.php) */
 .elvane-nav .elementor-nav-menu--main .elvane-menu-phone-only {
 	display: none !important;

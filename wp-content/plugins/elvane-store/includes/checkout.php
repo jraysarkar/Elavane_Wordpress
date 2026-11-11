@@ -153,6 +153,20 @@ function elvane_checkout_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'elvane_checkout_assets' );
 
+/* ---------- Add to cart: the side cart opens instead of a "View cart" notice ---------- */
+
+/**
+ * No "… has been added to your cart. View cart" bar: the side cart slides open
+ * with the item (Side Cart plugin, "Auto open cart" on). WooCommerce skips
+ * empty notices.
+ *
+ * @return string
+ */
+function elvane_no_added_to_cart_notice() {
+	return '';
+}
+add_filter( 'wc_add_to_cart_message_html', 'elvane_no_added_to_cart_notice' );
+
 /* ---------- Buy Now: this item only, straight to checkout ---------- */
 
 /** "Buy now" button next to "Add to cart" on product pages. */

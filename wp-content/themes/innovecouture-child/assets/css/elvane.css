@@ -1097,6 +1097,19 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	padding-left: 20px;
 }
 
+.elvane-text-page .page-content ul {
+	list-style: disc outside;
+}
+
+.elvane-text-page .page-content ol {
+	list-style: decimal outside;
+}
+
+.elvane-text-page .page-content li {
+	display: list-item;
+	margin-bottom: 6px;
+}
+
 .elvane-text-page .page-content a {
 	color: var(--elvane-black);
 	text-decoration: underline;

@@ -116,10 +116,18 @@ add_filter( 'woocommerce_account_menu_items', 'elvane_account_menu_items', 999 )
 
 /**
  * Send the bare My account page (the dashboard) to Orders, e.g. after login.
+ * Tabs added by plugins (the wishlist's /my-account/wishlist/) are not
+ * WooCommerce endpoints, so they are checked against the account menu too.
  */
 function elvane_account_skip_dashboard() {
 	if ( ! is_user_logged_in() || ! function_exists( 'is_account_page' ) || ! is_account_page() || is_wc_endpoint_url() ) {
 		return;
+	}
+	global $wp;
+	foreach ( array_keys( wc_get_account_menu_items() ) as $endpoint ) {
+		if ( isset( $wp->query_vars[ $endpoint ] ) ) {
+			return;
+		}
 	}
 	wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 	exit;

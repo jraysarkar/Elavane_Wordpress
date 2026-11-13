@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 – Elvane Clothing v2 (release candidate, not live yet)
+## 2.0.0 – Elvane Clothing v2 (live since 13 Nov 2026)
 
 The redesigned store. Version 1 is the current live site on the Mixtas theme;
 version 2 replaces it with the Innovecouture child theme and the `elvane-store`

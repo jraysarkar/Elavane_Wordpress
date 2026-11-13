@@ -272,13 +272,15 @@ add_filter( 'woocommerce_coupon_is_valid', 'elvane_one_coupon_per_order', 5, 2 )
 
 /**
  * Phone-login accounts start without a name or email; fill them from the order.
+ * Only empty fields are filled: an account that already has a name or email
+ * (an admin placing an order, a returning customer) keeps its own.
  *
  * @param int|WC_Order $order Order or order id.
  */
 function elvane_sync_customer_from_order( $order ) {
-	$order   = $order instanceof WC_Order ? $order : wc_get_order( $order );
-	$user_id = $order ? $order->get_user_id() : 0;
-	if ( ! $user_id ) {
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
+	$user  = $order ? get_userdata( $order->get_user_id() ) : false;
+	if ( ! $user ) {
 		return;
 	}
 
@@ -286,16 +288,18 @@ function elvane_sync_customer_from_order( $order ) {
 	$last  = $order->get_billing_last_name();
 	$email = sanitize_email( $order->get_billing_email() );
 
-	update_user_meta( $user_id, 'first_name', $first );
-	update_user_meta( $user_id, 'last_name', $last );
-
-	$update = array(
-		'ID'           => $user_id,
-		'display_name' => trim( $first . ' ' . $last ),
-	);
-	$owner  = $email ? email_exists( $email ) : false;
-	if ( $email && ( ! $owner || (int) $owner === (int) $user_id ) ) {
+	$update = array( 'ID' => $user->ID );
+	if ( '' === $user->first_name && '' === $user->last_name && ( $first || $last ) ) {
+		update_user_meta( $user->ID, 'first_name', $first );
+		update_user_meta( $user->ID, 'last_name', $last );
+		$update['display_name'] = trim( $first . ' ' . $last );
+	}
+	$owner = $email ? email_exists( $email ) : false;
+	if ( '' === $user->user_email && $email && ! $owner ) {
 		$update['user_email'] = $email;
+	}
+	if ( count( $update ) < 2 ) {
+		return;
 	}
 	// Filling in the email from an order is not a change the customer made, so
 	// no "[Elvane Clothing] Email Changed" notice.

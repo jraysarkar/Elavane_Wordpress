@@ -1362,6 +1362,13 @@ ul.products li.product.elvane-reveal:nth-child(4n) {
 	height: auto;
 }
 
+/* The photo zoom layer comes with z-index 1000, above the header (100): with the
+   Shop menu open over the photo, the mouse landed on the zoom layer, the menu
+   closed and the zoom started. Just above the photo is enough. */
+.single-product .gallery-svi .sviStackedZoomContainer {
+	z-index: 2 !important;
+}
+
 /* Smart Variations Images slider (swipe left/right): every slide is a 2:3
    frame, so the gallery does not jump between model photos and square
    product-only photos (those sit centred on white). */

@@ -835,9 +835,30 @@
 	border-radius: 0 !important;
 }
 
+/* Phones and tablets: the title is a tap-to-open row with the total on the
+   right, so the title text sits on the same centre line as the total. */
 .elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title {
 	margin-top: 0 !important;
-	padding: 0 !important;
+	padding: 16px 0 !important;
+	align-items: center;
+}
+
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title-text,
+.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title-price {
+	margin: 0 !important;
+	line-height: 1.4 !important;
+}
+
+/* Computers: a plain heading above the rows (WooCommerce's own breakpoint). */
+@container (min-width: 920px) {
+	.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title {
+		padding: 0 !important;
+	}
+
+	.elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title-text {
+		margin: 0 0 12px !important;
+		line-height: 1 !important;
+	}
 }
 
 .elvane-store-page .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-order-summary,

@@ -45,6 +45,18 @@ function elvane_require_login() {
 add_action( 'template_redirect', 'elvane_require_login', 5 );
 
 /**
+ * After logging out, go to the home page. WooCommerce's default (My account)
+ * needs login, so it opened the login popup aimed at My account, and logging
+ * in again from there landed on the Orders list.
+ *
+ * @return string
+ */
+function elvane_logout_redirect() {
+	return home_url( '/' );
+}
+add_filter( 'woocommerce_logout_default_redirect_url', 'elvane_logout_redirect' );
+
+/**
  * "Forgot Password?" instead of "Lost your password?" (as on live).
  *
  * @param string $translated Translated text.

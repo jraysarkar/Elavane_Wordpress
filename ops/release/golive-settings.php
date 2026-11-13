@@ -28,6 +28,11 @@ $options = array(
 	// Analytics: count every order (COD has no paid date until completed) and update immediately.
 	'woocommerce_date_type'                  => 'date_created',
 	'woocommerce_analytics_scheduled_import' => 'no',
+	// Store address (emails, invoices, shipping origin); live had it empty with the country set to Delhi.
+	'woocommerce_store_address'              => 'R.S.392, L.R.342, Nazrul Sarani, North Sukanta Nagar',
+	'woocommerce_store_city'                 => 'Jalpaiguri',
+	'woocommerce_store_postcode'             => '734006',
+	'woocommerce_default_country'            => 'IN:WB',
 );
 
 // Terms page (footer link and checkout): the page with slug terms-of-use.

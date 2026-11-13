@@ -1,7 +1,7 @@
 name,status,version
 woo-razorpay,active,4.8.8
 all-in-one-wp-migration-unlimited-main,inactive,6.77
-click-to-chat-for-whatsapp,active,4.45
+click-to-chat-for-whatsapp,inactive,4.45
 contact-form-7,active,6.2.2
 quick-view-and-buy-now-for-woocommerce,inactive,1.8
 duplicate-page,inactive,4.5.9
@@ -20,7 +20,7 @@ mixtas-core,inactive,1.0.1
 mixtas-demo-data,inactive,1.0.0
 nova-ajax-product-filter,inactive,1.0.2
 performant-translations,inactive,1.2.0
-pw-woocommerce-gift-cards,active,2.52
+pw-woocommerce-gift-cards,inactive,2.52
 royal-elementor-addons,inactive,1.7.1068
 shiprocket,inactive,2.0.9
 side-cart-woocommerce,active,2.8.2

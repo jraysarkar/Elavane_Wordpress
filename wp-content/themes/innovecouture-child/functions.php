@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ELVANE_CHILD_VERSION', '1.0.0' );
+define( 'ELVANE_CHILD_VERSION', '2.0.0' );
 
 /**
  * Load child styles and scripts after the parent theme's main stylesheet.

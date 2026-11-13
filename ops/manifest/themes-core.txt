@@ -1,4 +1,4 @@
 name,status,version
-innovecouture,active,44
+innovecouture,parent,44
 mixtas,inactive,1.1.5
-7.1.3
+7.1.4

@@ -11,6 +11,9 @@ The full go-live runbook (steps, owners, checks, rollback) is the shared
       wp eval-file golive-settings.php          # what would change
       wp eval-file golive-settings.php apply    # change it
 
+- `email-branding.php` — order emails (YayMail): Elvane black, Elvane footer.
+  Dry run by default; `apply` saves the old templates to /root/backups first.
+
 Release notes: `CHANGELOG.md` (2.0.0).
 
 Other release scripts: `ops/elementor/build_templates.py` + `install.php`

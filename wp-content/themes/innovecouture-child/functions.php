@@ -295,6 +295,22 @@ function elvane_phone_menu_links( $items, $args ) {
 add_filter( 'wp_nav_menu_objects', 'elvane_phone_menu_links', 10, 2 );
 
 /**
+ * Header account link (computer): "My account" once logged in, not "Login".
+ *
+ * @param string                 $content Widget HTML.
+ * @param \Elementor\Widget_Base $widget  Widget.
+ * @return string
+ */
+function elvane_header_account_label( $content, $widget ) {
+	if ( is_user_logged_in() && 'heading' === $widget->get_name()
+		&& false !== strpos( (string) $widget->get_settings( '_css_classes' ), 'elvane-account-link' ) ) {
+		$content = str_replace( '>Login<', '>' . esc_html__( 'My account', 'elvane' ) . '<', $content );
+	}
+	return $content;
+}
+add_filter( 'elementor/widget/render_content', 'elvane_header_account_label', 10, 2 );
+
+/**
  * Lets the CSS treat the home page header as transparent over the hero.
  *
  * @param string[] $classes Body classes.

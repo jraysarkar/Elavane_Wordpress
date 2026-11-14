@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Elvane Store
  * Description: Elvane Clothing store logic, independent of the theme: phone OTP login (Firebase, verified server-side), required login for account/checkout/wishlist, COD delivery charge, Buy Now, WELCOME200 rule, admin-managed home and category banners, and order-page touches.
- * Version:     2.0.0
+ * Version:     2.0.1
  * Author:      Elvane Clothing
  * Requires Plugins: woocommerce
  * Text Domain: elvane-store
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ELVANE_STORE_VERSION', '2.0.0' );
+define( 'ELVANE_STORE_VERSION', '2.0.1' );
 define( 'ELVANE_STORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ELVANE_STORE_URL', plugin_dir_url( __FILE__ ) );
 

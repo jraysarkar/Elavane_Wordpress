@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.0.1 – Fixes after go-live (14 Nov 2026)
+
+Found while testing the live store end to end (orders, emails, iCarry, admin).
+Live and dev both run this version.
+
+### For customers
+- My account → Wishlist opens the wishlist; it used to jump to the Orders list.
+- Logging out goes to the home page. Before, it opened the login popup aimed
+  at My account, so logging in again landed on Orders.
+- Product page (computer): the Shop menu stays open over the product photo;
+  the photo zoom used to take over and close the menu.
+- Header (computer) shows "My account" instead of "Login" once logged in.
+- Checkout on phones: "Order summary" lines up with the total.
+- Order emails: Elvane's black design and footer ("Elvane Clothing ·
+  Jalpaiguri, West Bengal · elvaneclothing.com · info@elvaneclothing.com")
+  instead of the red design and the old agency credit; closing line "Thank you
+  for shopping with Elvane."
+
+### For the admin
+- An order no longer overwrites the name or email of an account that already
+  has them (it had renamed an admin to the order's name). New phone-login
+  accounts still get their name and email from their first order.
+
+### Technical
+- `ops/release/email-branding.php`: restyles the YayMail templates (dry run /
+  `apply` with a backup of the old templates).
+- Settings changed on live, not in code: sender Elvane Clothing
+  <noreply@elvaneclothing.com> with Reply-To info@, admin login at
+  /management-area (WPS Hide Login), Shiprocket off, iCarry connector
+  reconnected.
+
+### Known, not fixed
+- A struck-through price can show one paisa more (e.g. ₹1,699.01) for
+  logged-in customers outside West Bengal; the amount charged is correct.
+
 ## 2.0.0 – Elvane Clothing v2 (live since 13 Nov 2026)
 
 The redesigned store. Version 1 is the current live site on the Mixtas theme;

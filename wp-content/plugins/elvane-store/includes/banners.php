@@ -456,14 +456,20 @@ function elvane_home_shortcode() {
 	}
 
 	// Latest products (heading, link text and number from Banners → Site settings).
+	// The first batch is in the page; scrolling loads the next batches
+	// (assets/home-more.js), then "View all products" leads to Shop.
 	$count = (int) elvane_site( 'new_count' );
 	if ( $count > 0 ) {
 		$link  = elvane_site( 'new_link' );
+		$shop  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 		$html .= sprintf(
-			'<section class="elvane-section"><div class="elvane-section__head"><h2 class="elvane-section__title">%s</h2>%s</div><div class="elvane-products">%s</div></section>',
+			'<section class="elvane-section"><div class="elvane-section__head"><h2 class="elvane-section__title">%s</h2>%s</div><div class="elvane-products" data-elvane-more="%s">%s</div><div class="elvane-more"><span class="elvane-more__status" aria-live="polite"></span><span class="elvane-textlink"><a href="%s">%s</a></span></div></section>',
 			esc_html( elvane_site( 'new_title' ) ),
-			$link ? '<span class="elvane-textlink"><a href="' . esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ) . '">' . esc_html( $link ) . '</a></span>' : '',
-			do_shortcode( sprintf( '[products limit="%d" columns="4" orderby="date" order="DESC"]', $count ) )
+			$link ? '<span class="elvane-textlink"><a href="' . esc_url( $shop ) . '">' . esc_html( $link ) . '</a></span>' : '',
+			esc_attr( wp_json_encode( array( 'total' => elvane_home_product_total() ) ) ),
+			elvane_home_products( 1 ),
+			esc_url( $shop ),
+			esc_html__( 'View all products', 'elvane-store' )
 		);
 	}
 
@@ -471,6 +477,88 @@ function elvane_home_shortcode() {
 	return sprintf( '<div class="elvane-home" data-strip="%s">%s</div>', esc_attr( wp_json_encode( elvane_site_lines( 'strip' ) ) ), $html );
 }
 add_shortcode( 'elvane_home', 'elvane_home_shortcode' );
+
+/**
+ * One batch of the home page's latest products, newest first. The batch size
+ * is "Number of latest products" in Banners → Site settings.
+ *
+ * @param int $page Batch number, from 1.
+ * @return string Product grid HTML.
+ */
+function elvane_home_products( $page ) {
+	$count = max( 1, min( 24, (int) elvane_site( 'new_count' ) ) );
+	return do_shortcode( sprintf( '[products limit="%d" columns="4" orderby="date" order="DESC" page="%d"]', $count, max( 1, (int) $page ) ) );
+}
+
+/**
+ * Number of products the latest-products grid can show in all (the same
+ * products Shop lists: published, visible in the catalogue).
+ *
+ * @return int
+ */
+function elvane_home_product_total() {
+	$args = array(
+		'status'     => 'publish',
+		'visibility' => 'catalog',
+		'limit'      => -1,
+		'return'     => 'ids',
+	);
+	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		$args['stock_status'] = 'instock';
+	}
+	return count( wc_get_products( $args ) );
+}
+
+/** AJAX: the next batch of latest products for the home page. */
+function elvane_home_more_products() {
+	$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- read-only public list.
+	if ( $page < 2 || $page > 100 ) {
+		wp_die( '', '', array( 'response' => 400 ) );
+	}
+	echo elvane_home_products( $page ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WooCommerce product template output.
+	wp_die();
+}
+add_action( 'wp_ajax_elvane_home_more', 'elvane_home_more_products' );
+add_action( 'wp_ajax_nopriv_elvane_home_more', 'elvane_home_more_products' );
+
+/** Home page: load the next products while scrolling. */
+function elvane_home_more_assets() {
+	if ( ! is_front_page() ) {
+		return;
+	}
+	wp_enqueue_script(
+		'elvane-home-more',
+		ELVANE_STORE_URL . 'assets/home-more.js',
+		array(),
+		elvane_store_asset_version( 'assets/home-more.js' ),
+		array( 'strategy' => 'defer', 'in_footer' => true )
+	);
+	wp_localize_script(
+		'elvane-home-more',
+		'elvaneHomeMore',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'loading' => __( 'Loading more…', 'elvane-store' ),
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', 'elvane_home_more_assets' );
+
+/** Shop, category, tag and product search pages: next page loads while scrolling. */
+function elvane_archive_more_assets() {
+	if ( ! function_exists( 'is_shop' ) || ! ( is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_query_var( 'post_type' ) ) ) ) {
+		return;
+	}
+	wp_enqueue_script(
+		'elvane-archive-more',
+		ELVANE_STORE_URL . 'assets/archive-more.js',
+		array(),
+		elvane_store_asset_version( 'assets/archive-more.js' ),
+		array( 'strategy' => 'defer', 'in_footer' => true )
+	);
+	wp_localize_script( 'elvane-archive-more', 'elvaneArchiveMore', array( 'loading' => __( 'Loading more…', 'elvane-store' ) ) );
+}
+add_action( 'wp_enqueue_scripts', 'elvane_archive_more_assets' );
 
 /* ---------- Category pages ---------- */
 

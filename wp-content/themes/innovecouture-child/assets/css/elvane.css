@@ -824,6 +824,36 @@ body {
 	margin: 0;
 }
 
+/* Below the latest products: "Loading more…" while scrolling loads the next
+   batch (elvane-store home-more.js), then "View all products". */
+.elvane-home .elvane-more {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 40px var(--elvane-gutter) 64px;
+}
+
+/* Shop and category pages: the same status line in place of the page buttons. */
+.elvane-archive-more {
+	min-height: 40px;
+	padding: 14px 0;
+	text-align: center;
+}
+
+.elvane-home .elvane-more__status,
+.elvane-archive-more {
+	min-height: 12px;
+	color: var(--elvane-grey-text);
+	font: 400 11px/1 var(--elvane-font);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.elvane-home .elvane-more__sentinel {
+	height: 1px;
+}
+
 /* ---------- Category page banner (Products → Categories → Banner image) ---------- */
 
 .elvane-category-banner {

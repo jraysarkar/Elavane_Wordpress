@@ -834,7 +834,12 @@ body {
 	padding: 40px var(--elvane-gutter) 64px;
 }
 
-/* Shop and category pages: the same status line in place of the page buttons. */
+/* Shop and category pages: the same status line in place of the page buttons
+   (the theme styles the buttons with display, which beats the hidden flag). */
+.woocommerce-pagination[hidden] {
+	display: none !important;
+}
+
 .elvane-archive-more {
 	min-height: 40px;
 	padding: 14px 0;
